@@ -1,0 +1,1 @@
+{"level":"info","foo":"bee","time":"2022-03-02T14:37:32.736266+08:00","message":"hello world"}

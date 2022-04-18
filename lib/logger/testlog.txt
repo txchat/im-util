@@ -1,0 +1,1 @@
+{"level":"info","foo":"bee","message":"hello world"}
