@@ -1,5 +1,6 @@
-build/
 .DS_Store
-
-log/
 .idea/
+build/
+target/
+protocol/target/
+log/
