@@ -34,9 +34,12 @@ import (
 // genCmd represents the gen command
 var genCmd = &cobra.Command{
 	Use:   "gen",
-	Short: "生成IM鉴权帧数据，输出格式Base64([]byte)",
-	Long:  ``,
-	RunE:  genRunE,
+	Short: "生成IM鉴权帧数据",
+	Long: `
+
+鉴权数据帧输出格式为Base64([]byte)
+`,
+	RunE: genRunE,
 }
 
 var (

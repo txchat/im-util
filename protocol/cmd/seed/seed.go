@@ -31,11 +31,8 @@ import (
 // Cmd represents the seed command
 var Cmd = &cobra.Command{
 	Use:   "seed",
-	Short: "",
+	Short: "seed相关命令",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
 }
 
 var (

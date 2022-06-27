@@ -28,11 +28,8 @@ import (
 // Cmd represents the dh command
 var Cmd = &cobra.Command{
 	Use:   "dh",
-	Short: "",
+	Short: "dh算法加解密",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
 }
 
 var (

@@ -10,7 +10,7 @@ import (
 var Cmd = &cobra.Command{
 	Use:   "signature",
 	Short: "signature是用于标准的签名和验签方法",
-	Long:  `用于标准的签名和验签方法
+	Long: `用于标准的签名和验签方法
 
 默认的签名算法库「secp256k1_haltingstate」
 目前支持：
