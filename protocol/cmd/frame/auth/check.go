@@ -25,10 +25,11 @@ import (
 	"bytes"
 	"encoding/base64"
 	"github.com/Terry-Mao/goim/pkg/bufio"
-	"github.com/txchat/im-util/protocol/frame"
-	comet "github.com/txchat/im/api/comet/grpc"
-
 	"github.com/spf13/cobra"
+	"github.com/txchat/im-util/protocol/frame"
+	_ "github.com/txchat/im-util/protocol/frame/dtalk"
+	_ "github.com/txchat/im-util/protocol/frame/zb_otc"
+	comet "github.com/txchat/im/api/comet/grpc"
 )
 
 // checkCmd represents the check command
@@ -53,7 +54,9 @@ func init() {
 	// checkCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	checkCmd.Flags().StringVarP(&dataBase64, "data", "d", "", "the frame data encoded by base64")
 	checkCmd.Flags().StringVarP(&appType, "type", "T", "dtalk", "check app type -T=[dtalk]")
-	checkCmd.Flags().BoolVarP(&isCkTimeOut, "timeout", "t", false, "check timeout enable -t=[true]")
+	checkCmd.Flags().BoolVarP(&isCkTimeOut, "timeout", "", false, "check timeout enable -t=[false]")
+
+	checkCmd.MarkFlagRequired("data")
 }
 
 var (

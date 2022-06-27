@@ -64,7 +64,7 @@ func init() {
 	genCmd.Flags().StringVarP(&publicKey, "public", "P", "", "公钥的十六进制字符串编码")
 	genCmd.Flags().Int64VarP(&timestamp, "timestamp", "t", time.Now().UnixMilli(), "签名时间戳（默认，当前），单位：毫秒")
 	genCmd.Flags().StringVarP(&mnemonic, "mnemonic", "m", "", "助记词")
-	genCmd.Flags().StringVarP(&appKey, "app", "a", "", "APP ID")
+	genCmd.Flags().StringVarP(&appKey, "app", "a", "dtalk", "APP ID[默认:dtalk]")
 
 	//
 	genCmd.MarkFlagsMutuallyExclusive("mnemonic", "private")
@@ -94,7 +94,7 @@ func genRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	client := auth.NewDefaultApiAuthenticator()
-	sig := client.Request(appKey, public, private)
-	cmd.Printf("signature is: %s\n", sig)
+	token := client.Request(appKey, public, private)
+	cmd.Printf("token is: %s\n", token)
 	return nil
 }

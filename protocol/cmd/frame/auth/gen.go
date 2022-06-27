@@ -67,6 +67,8 @@ func init() {
 
 	genCmd.Flags().StringVarP(&appType, "type", "T", "dtalk", "app type -T=[dtalk]")
 	genCmd.Flags().StringVarP(&token, "token", "t", "", "auth token")
+
+	genCmd.MarkFlagRequired("token")
 }
 
 func genRunE(cmd *cobra.Command, args []string) error {
@@ -97,8 +99,7 @@ func genRunE(cmd *cobra.Command, args []string) error {
 		Body: authFrameData,
 	}
 
-	var buf = make([]byte, 1024)
-	buffer := bytes.NewBuffer(buf)
+	buffer := new(bytes.Buffer)
 
 	wr := bufio.NewWriter(buffer)
 	err = p.WriteTCP(wr)
@@ -109,6 +110,8 @@ func genRunE(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	cmd.Println(base64.StdEncoding.EncodeToString(buf[:wr.Buffered()]))
+	buf := buffer.Bytes()
+	cmd.Printf("base64 encoding:%s\n", base64.StdEncoding.EncodeToString(buf))
+	cmd.Printf("hex encoding:%s\n", hex.EncodeToString(buf))
 	return nil
 }

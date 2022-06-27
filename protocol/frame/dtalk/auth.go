@@ -6,7 +6,8 @@ import (
 	"github.com/txchat/dtalk/pkg/address"
 	"github.com/txchat/dtalk/pkg/auth"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
-	secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
+	//secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
+	secp256k1_haltingstate "github.com/txchat/dtalk/pkg/crypt/secp256k1-haltingstate"
 	"github.com/txchat/im-util/protocol/frame"
 	comet "github.com/txchat/im/api/comet/grpc"
 )
@@ -15,7 +16,7 @@ var driver xcrypt.Encrypt
 
 func init() {
 	var err error
-	driver, err = xcrypt.Load(secp256k1_ethereum.Name)
+	driver, err = xcrypt.Load(secp256k1_haltingstate.Name)
 	if err != nil {
 		panic(err)
 	}
