@@ -70,17 +70,20 @@ func (w *Wallet) GetKeyParis() ([]byte, []byte) {
 	return w.publicKey, w.privateKey
 }
 
+// Creator 钱包创建者
 type Creator interface {
 	Length() int
 	Foreach(start, end int) Iterator
 	NewWallet(v interface{}) (*Wallet, error)
 }
 
+// Iterator 钱包创建者迭代器
 type Iterator interface {
 	HasNext() bool
 	Next() (int, interface{})
 }
 
+// MnemonicCreatorIterator 从助记词创建用户的迭代器
 type MnemonicCreatorIterator struct {
 	data  []*Metadata
 	index int
@@ -97,6 +100,7 @@ func (i *MnemonicCreatorIterator) Next() (index int, v interface{}) {
 	return
 }
 
+// MnemonicCreator 从助记词创建用户
 type MnemonicCreator struct {
 	mds []*Metadata
 }
@@ -122,7 +126,7 @@ func (mc *MnemonicCreator) NewWallet(v interface{}) (*Wallet, error) {
 	return NewWalletFromMetadata(v.(*Metadata))
 }
 
-//
+// ProduceCreatorIterator 新用户创建者的迭代器
 type ProduceCreatorIterator struct {
 	len   int
 	start int
@@ -140,6 +144,7 @@ func (i *ProduceCreatorIterator) Next() (index int, v interface{}) {
 	return
 }
 
+// ProduceCreator 新用户创建者
 type ProduceCreator struct {
 	number int
 }
@@ -166,7 +171,7 @@ func (mc *ProduceCreator) NewWallet(v interface{}) (*Wallet, error) {
 	return CreateNewWallet()
 }
 
-//
+// Factory 钱包创建工厂
 type Factory struct {
 	creator Creator
 	ret     []*Wallet

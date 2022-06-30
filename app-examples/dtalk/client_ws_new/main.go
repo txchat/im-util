@@ -32,11 +32,11 @@ func main() {
 }
 
 func client(appId, token, server string) {
-	cli, err := lib.NewClient(appId, token, server, 20*time.Second, ws.Auth)
+	cli, err := net.DialIM(appId, token, server, 20*time.Second, ws.Auth)
 	if err != nil {
 		panic(err)
 	}
-	cli.SetBiz(new(biz))
+	cli.SetOnReceive(new(biz))
 	cli.Serve()
 	Send(cli)
 }
@@ -44,11 +44,11 @@ func client(appId, token, server string) {
 type biz struct {
 }
 
-func (b *biz) Receive(c *lib.Client, p *comet.Proto) error {
+func (b *biz) Receive(c *net.IMConn, p *comet.Proto) error {
 	return nil
 }
 
-func Send(c *lib.Client) {
+func Send(c *net.IMConn) {
 	//write message
 	go func() {
 		pp := new(comet.Proto)

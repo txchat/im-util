@@ -39,13 +39,13 @@ func main() {
 }
 
 func client(appId, token, server, logicAddr, uid string, groups []string) {
-	cli, err := lib.NewClient(appId, token, server, 5*time.Second, ws.Auth)
+	cli, err := net.DialIM(appId, token, server, 5*time.Second, ws.Auth)
 	if err != nil {
 		panic(err)
 	}
-	cli.SetBiz(new(biz))
+	cli.SetOnReceive(new(biz))
 	cli.Serve()
-	g := lib.NewGroup(appId, uid, logicAddr)
+	g := net.NewGroup(appId, uid, logicAddr)
 	err = g.JoinIn(groups)
 	if err != nil {
 		log.Error("JoinIn", "err", err)
@@ -56,7 +56,7 @@ func client(appId, token, server, logicAddr, uid string, groups []string) {
 type biz struct {
 }
 
-func (b *biz) Receive(c *lib.Client, p *comet.Proto) error {
+func (b *biz) Receive(c *net.IMConn, p *comet.Proto) error {
 	log.Debug("get msg", "uid", c.GetUid(), "proto", p)
 	return nil
 }
