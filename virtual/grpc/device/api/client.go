@@ -9,7 +9,7 @@ import (
 
 type Client struct {
 	conn   *grpc.ClientConn
-	client DriverClient
+	client DeviceClient
 }
 
 var kacp = keepalive.ClientParameters{
@@ -26,7 +26,7 @@ func New(addr string) *Client {
 	}
 	return &Client{
 		conn:   conn,
-		client: NewDriverClient(conn),
+		client: NewDeviceClient(conn),
 	}
 }
 
@@ -46,14 +46,14 @@ func (c *Client) DisConnect(ctx context.Context, in *DisConnectReq, opts ...grpc
 	return c.client.DisConnect(ctx, in, opts...)
 }
 
-func (c *Client) ChangeCurrentPage(ctx context.Context, in *ChangeCurrentPageReq, opts ...grpc.CallOption) (*ChangeCurrentPageReply, error) {
-	return c.client.ChangeCurrentPage(ctx, in, opts...)
+func (c *Client) Focus(ctx context.Context, in *FocusReq, opts ...grpc.CallOption) (*FocusReply, error) {
+	return c.client.Focus(ctx, in, opts...)
 }
 
-func (c *Client) Input(ctx context.Context, opts ...grpc.CallOption) (Driver_InputClient, error) {
+func (c *Client) Input(ctx context.Context, opts ...grpc.CallOption) (Device_InputClient, error) {
 	return c.client.Input(ctx, opts...)
 }
 
-func (c *Client) Output(ctx context.Context, in *OutputReq, opts ...grpc.CallOption) (Driver_OutputClient, error) {
+func (c *Client) Output(ctx context.Context, in *OutputReq, opts ...grpc.CallOption) (Device_OutputClient, error) {
 	return c.client.Output(ctx, in, opts...)
 }

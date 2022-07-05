@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	pb "github.com/txchat/im-util/pressure/pkg/device/api"
+	pb "github.com/txchat/im-util/virtual/grpc/device/api"
+	xproto "github.com/txchat/imparse/proto"
 	"io"
 	"os"
 	"os/signal"
@@ -29,21 +30,18 @@ func init() {
 }
 
 func do(cmd *cobra.Command, args []string) {
-	//load users
 	log := zerolog.New(os.Stderr).With().Timestamp().Logger()
-	log.Info().Str("server", server).Msg("success config")
-
-	log.Info().Msg("screen start")
 	client := pb.New(server)
 	stream, err := client.Output(context.Background(), &pb.OutputReq{})
 	if err != nil {
 		log.Error().Err(err).Msg("ListFile")
 		return
 	}
+	log.Info().Str("server", server).Msg("device connected!")
 
 	go func() {
 		for {
-			msg, err := stream.Recv()
+			rev, err := stream.Recv()
 			if err == io.EOF {
 				break
 			}
@@ -51,12 +49,11 @@ func do(cmd *cobra.Command, args []string) {
 				log.Error().Err(err).Msg("Recv")
 				return
 			}
-			fmt.Println(msg.GetMsg())
+			fmt.Printf("[%s-%s]:%s", xproto.Channel_name[rev.GetChannelType()], rev.GetTarget(), rev.GetMsg())
 		}
 		log.Info().Msg("device power off")
 	}()
 
-	//block
 	// init signal
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)

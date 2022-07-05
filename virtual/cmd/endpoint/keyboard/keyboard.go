@@ -9,7 +9,7 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	pb "github.com/txchat/im-util/pressure/pkg/device/api"
+	pb "github.com/txchat/im-util/virtual/grpc/device/api"
 )
 
 var Cmd = &cobra.Command{
