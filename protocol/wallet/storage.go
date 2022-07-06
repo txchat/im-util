@@ -1,73 +1,14 @@
 package wallet
 
+/*
+	文件的读写驱动，用于实现将用户从文件格式化读出和写入
+*/
 import (
 	"bufio"
-	"encoding/hex"
-	"errors"
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/33cn/chain33/wallet/bipwallet"
 )
-
-type Metadata struct {
-	privateKey []byte
-	publicKey  []byte
-	mnemonic   string
-	address    string
-}
-
-func FormatMetadataFromWallet(w *Wallet) (*Metadata, error) {
-	address, err := bipwallet.PubToAddress(w.publicKey)
-	if err != nil {
-		return nil, err
-	}
-	return &Metadata{
-		privateKey: w.privateKey,
-		publicKey:  w.publicKey,
-		mnemonic:   w.mnemonic,
-		address:    address,
-	}, nil
-}
-
-func FormatMetadata(row, split string) (*Metadata, error) {
-	var privateKey []byte
-	var publicKey []byte
-	mne := row
-	address := ""
-
-	if split != "" {
-		var err error
-		items := strings.Split(row, split)
-		if len(items) != 4 {
-			return nil, errors.New("item number is not 4")
-		}
-		mne = items[0]
-		address = items[3]
-		privateKey, err = hex.DecodeString(items[1])
-		if err != nil {
-			return nil, err
-		}
-		publicKey, err = hex.DecodeString(items[2])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return &Metadata{
-		privateKey: privateKey,
-		publicKey:  publicKey,
-		mnemonic:   mne,
-		address:    address,
-	}, nil
-}
-
-func (m *Metadata) Convert(split string) string {
-	if split != "" {
-		return strings.Join([]string{m.mnemonic, hex.EncodeToString(m.privateKey), hex.EncodeToString(m.publicKey), m.address}, split)
-	}
-	return m.mnemonic
-}
 
 type FSDriver struct {
 	split string

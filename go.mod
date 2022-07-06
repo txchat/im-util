@@ -4,9 +4,11 @@ go 1.15
 
 require (
 	github.com/33cn/chain33 v1.65.3
-	github.com/BurntSushi/toml v0.3.1
 	github.com/Terry-Mao/goim v0.0.0-20210523140626-e742c99ad76e
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
+	github.com/charmbracelet/bubbles v0.12.1-0.20220701153126-7cc578698457
+	github.com/charmbracelet/bubbletea v0.22.0
+	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/frankban/quicktest v1.14.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
 	github.com/gin-gonic/gin v1.6.3
@@ -15,10 +17,8 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.4.2
-	github.com/inconshreveable/log15 v0.0.0-20201112154412-8562bdadbbac
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/prometheus/client_golang v1.11.1 // indirect
 	github.com/rs/zerolog v1.21.0
 	github.com/spf13/cobra v1.5.0

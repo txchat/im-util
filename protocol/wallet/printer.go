@@ -1,5 +1,8 @@
 package wallet
 
+/*
+	将用户助记词等元数据以特定的格式输出到屏幕
+*/
 import (
 	"encoding/hex"
 	"fmt"

@@ -1,0 +1,59 @@
+// protoc -I=. -I=$GOPATH/src --go_out=plugins=grpc:. *.proto
+syntax = "proto3";
+
+package device;
+option go_package = "github.com/txchat/im-util/virtual/device";
+
+message ConnectReq {
+}
+
+message ConnectReply {
+}
+
+message ReConnectReq {
+}
+
+message ReConnectReply {
+}
+
+message DisConnectReq {
+}
+
+message DisConnectReply {
+}
+
+message FocusReq {
+  int32 channelType = 1;
+  string target = 2;
+}
+
+message FocusReply {
+}
+
+message InputReq {
+  string text = 1;
+}
+
+message InputReply {
+  string err = 1;
+}
+
+
+message OutputReq {
+}
+
+message OutputReply {
+  string msg = 1;
+  int32 channelType = 2;
+  string target = 3;
+}
+
+service Device {
+  rpc Connect(ConnectReq) returns (ConnectReply);
+  rpc ReConnect(ReConnectReq) returns (ReConnectReply);
+  rpc DisConnect(DisConnectReq) returns (DisConnectReply);
+  rpc Focus(FocusReq) returns (FocusReply);
+
+  rpc Input(stream InputReq) returns (InputReply);
+  rpc Output(OutputReq) returns (stream OutputReply);
+}
