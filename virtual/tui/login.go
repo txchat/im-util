@@ -8,8 +8,8 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/txchat/im-util/internel/device"
-	"github.com/txchat/im-util/internel/user"
+	"github.com/txchat/im-util/internal/device"
+	"github.com/txchat/im-util/internal/user"
 	"github.com/txchat/im-util/protocol/wallet"
 	"github.com/txchat/imparse/proto"
 )

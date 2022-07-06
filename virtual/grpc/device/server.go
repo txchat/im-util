@@ -3,8 +3,8 @@ package device
 import (
 	"context"
 	xgrpc "github.com/txchat/dtalk/pkg/net/grpc"
-	"github.com/txchat/im-util/internel/device"
-	protoutil "github.com/txchat/im-util/internel/proto"
+	"github.com/txchat/im-util/internal/device"
+	protoutil "github.com/txchat/im-util/internal/proto"
 	"github.com/txchat/im-util/pkg/net"
 	pb "github.com/txchat/im-util/virtual/grpc/device/api"
 	comet "github.com/txchat/im/api/comet/grpc"
