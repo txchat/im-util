@@ -1,8 +1,8 @@
 package msggenerator
 
 import (
-	"github.com/txchat/im-util/internel/device"
-	"github.com/txchat/im-util/internel/user"
+	"github.com/txchat/im-util/internal/device"
+	"github.com/txchat/im-util/internal/user"
 	xproto "github.com/txchat/imparse/proto"
 	"math/rand"
 	"time"

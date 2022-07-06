@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	protoutil "github.com/txchat/im-util/internel/proto"
+	protoutil "github.com/txchat/im-util/internal/proto"
 	"github.com/txchat/im-util/pkg/net"
 	"github.com/txchat/im-util/pkg/net/ws"
 	comet "github.com/txchat/im/api/comet/grpc"

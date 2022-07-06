@@ -9,11 +9,11 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/internel/device"
-	xlog "github.com/txchat/im-util/internel/log"
-	"github.com/txchat/im-util/internel/rate"
-	"github.com/txchat/im-util/internel/reader"
-	"github.com/txchat/im-util/internel/user"
+	"github.com/txchat/im-util/internal/device"
+	xlog "github.com/txchat/im-util/internal/log"
+	"github.com/txchat/im-util/internal/rate"
+	"github.com/txchat/im-util/internal/reader"
+	"github.com/txchat/im-util/internal/user"
 	"github.com/txchat/im-util/pkg/util"
 	"github.com/txchat/im-util/pressure/pkg/msggenerator"
 )

@@ -3,7 +3,7 @@ package analyze
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	xlog "github.com/txchat/im-util/internel/log"
+	xlog "github.com/txchat/im-util/internal/log"
 	"github.com/txchat/im-util/pkg/util"
 	"github.com/txchat/im-util/pressure/pkg/analyze"
 	"os"
