@@ -19,46 +19,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package connect
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/pressure/cmd/analyze"
-	"github.com/txchat/im-util/pressure/cmd/connect"
-	"github.com/txchat/im-util/pressure/cmd/pressure"
-	"os"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "pressure",
-	Short: "",
-	Long:  ``,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//Run: func(cmd *cobra.Command, args []string) {},
-	Version: version(),
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+// connCmd represents the conn command
+var Cmd = &cobra.Command{
+	Use:   "conn",
+	Short: "批量连接相关命令",
+	Long: `功能列表：
+1. 启动指定数量的客户端连接，并保持心跳，不发送消息。`,
 }
 
 func init() {
 	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.protocol.yaml)")
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// connCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.AddCommand(pressure.Cmd)
-	rootCmd.AddCommand(analyze.Cmd)
-	rootCmd.AddCommand(connect.Cmd)
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// connCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

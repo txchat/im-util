@@ -22,43 +22,58 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/pressure/cmd/analyze"
-	"github.com/txchat/im-util/pressure/cmd/connect"
-	"github.com/txchat/im-util/pressure/cmd/pressure"
-	"os"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "pressure",
-	Short: "",
+// https://github.com/spf13/cobra/issues/943
+// https://github.com/spf13/cobra/issues/724#issuecomment-612015666
+// versionCmd represents the version command
+var versionCmd = &cobra.Command{
+	Use:   "version",
+	Short: "打印版本号",
 	Long:  ``,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	//Run: func(cmd *cobra.Command, args []string) {},
-	Version: version(),
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
-	}
+	Run: func(cmd *cobra.Command, args []string) {
+		root := cmd.Root()
+		root.SetArgs([]string{"--version"})
+		root.Execute()
+	},
 }
 
 func init() {
+	rootCmd.AddCommand(versionCmd)
+
 	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.protocol.yaml)")
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// versionCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.AddCommand(pressure.Cmd)
-	rootCmd.AddCommand(analyze.Cmd)
-	rootCmd.AddCommand(connect.Cmd)
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// versionCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+var (
+	// projectVersion 项目版本
+	projectVersion = ""
+	// goVersion go版本
+	goVersion = ""
+	// gitCommit git提交commit id
+	gitCommit = ""
+	// buildTime 编译时间
+	buildTime = ""
+	// osArch 目标主机架构
+	osArch = ""
+)
+
+func version() string {
+	return fmt.Sprintf("%s\ngoVersion=%s\ngitCommit=%s\nbuildTime=%s\nosArch=%s\n",
+		projectVersion,
+		goVersion,
+		gitCommit,
+		buildTime,
+		osArch,
+	)
 }

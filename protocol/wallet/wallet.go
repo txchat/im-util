@@ -198,11 +198,13 @@ func (f *Factory) Create(cpus int) error {
 		wg.Add(1)
 		go func(index int) {
 			defer wg.Done()
-			iter := f.creator.Foreach(index*cnt, (index+1)*cnt)
+			begin := index * cnt
+			end := (index + 1) * cnt
+			iter := f.creator.Foreach(begin, end)
 			for iter.HasNext() {
 				var err error
 				j, v := iter.Next()
-				f.ret[index+j], err = f.creator.NewWallet(v)
+				f.ret[begin+j], err = f.creator.NewWallet(v)
 				if err != nil {
 					panic(err)
 				}

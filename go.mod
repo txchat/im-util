@@ -11,6 +11,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.5.0
 	github.com/frankban/quicktest v1.14.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/gammazero/workerpool v1.1.2
 	github.com/gin-gonic/gin v1.6.3
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
