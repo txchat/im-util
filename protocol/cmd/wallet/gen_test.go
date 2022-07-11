@@ -1,8 +1,9 @@
 package wallet
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func Test_genWallet(t *testing.T) {

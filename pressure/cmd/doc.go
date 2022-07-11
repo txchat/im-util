@@ -22,9 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
-	"os"
 )
 
 var (

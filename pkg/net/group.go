@@ -2,9 +2,10 @@ package net
 
 import (
 	"context"
+	"time"
+
 	logic "github.com/txchat/im/api/logic/grpc"
 	"github.com/txchat/im/common"
-	"time"
 )
 
 type Group struct {

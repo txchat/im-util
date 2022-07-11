@@ -3,9 +3,10 @@ package tui
 import (
 	"bufio"
 	"bytes"
-	tea "github.com/charmbracelet/bubbletea"
 	"io/ioutil"
 	"text/template"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type headerRegion struct {

@@ -22,9 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/virtual/cmd/device"
-	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands

@@ -1,10 +1,11 @@
 package user
 
 import (
+	"time"
+
 	"github.com/txchat/dtalk/pkg/auth"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
 	secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
-	"time"
 )
 
 var (

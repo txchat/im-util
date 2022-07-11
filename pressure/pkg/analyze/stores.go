@@ -3,8 +3,9 @@ package analyze
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/txchat/dtalk/pkg/util"
 	"time"
+
+	"github.com/txchat/dtalk/pkg/util"
 )
 
 type tiledRev struct {
@@ -22,7 +23,7 @@ func (t *tiledRev) LoadConn(connId string) {
 }
 
 func (t *tiledRev) ExceptConnId(connId string) string {
-	for cid, _ := range t.connId {
+	for cid := range t.connId {
 		if cid != connId {
 			return cid
 		}
@@ -119,7 +120,7 @@ func (t *AnalyzeStore) FailedCount() int {
 func (t *AnalyzeStore) TileRev() {
 	// key:mid, val: connId
 	for connId, connection := range t.connInfo {
-		for mid, _ := range connection.allRev {
+		for mid := range connection.allRev {
 			var xx *tiledRev
 			var ok bool
 			if xx, ok = t.tileRev[mid]; !ok {

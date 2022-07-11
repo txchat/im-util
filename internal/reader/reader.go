@@ -2,6 +2,7 @@ package reader
 
 import (
 	"errors"
+
 	"github.com/txchat/im-util/protocol/wallet"
 )
 

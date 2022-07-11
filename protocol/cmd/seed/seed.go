@@ -23,6 +23,7 @@ package seed
 
 import (
 	"crypto/sha512"
+
 	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/spf13/cobra"

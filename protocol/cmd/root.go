@@ -22,13 +22,14 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/protocol/cmd/dh"
 	"github.com/txchat/im-util/protocol/cmd/frame"
 	"github.com/txchat/im-util/protocol/cmd/seed"
 	"github.com/txchat/im-util/protocol/cmd/token"
 	"github.com/txchat/im-util/protocol/cmd/wallet"
-	"os"
 )
 
 // rootCmd represents the base command when called without any subcommands

@@ -25,6 +25,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/hex"
+
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"

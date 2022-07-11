@@ -1,8 +1,9 @@
 package signature
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func Test_verifyRunE(t *testing.T) {

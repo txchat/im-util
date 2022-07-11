@@ -1,11 +1,12 @@
 package msggenerator
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/txchat/im-util/internal/device"
 	"github.com/txchat/im-util/internal/user"
 	xproto "github.com/txchat/imparse/proto"
-	"math/rand"
-	"time"
 )
 
 type MsgGenerator struct {

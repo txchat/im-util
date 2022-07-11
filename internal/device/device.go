@@ -1,6 +1,11 @@
 package device
 
 import (
+	"strconv"
+	"sync"
+	"sync/atomic"
+	"time"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/rs/zerolog"
 	"github.com/txchat/dtalk/pkg/util"
@@ -11,10 +16,6 @@ import (
 	comet "github.com/txchat/im/api/comet/grpc"
 	"github.com/txchat/im/dtask"
 	xproto "github.com/txchat/imparse/proto"
-	"strconv"
-	"sync"
-	"sync/atomic"
-	"time"
 )
 
 type OnReceiveHandler func(c *net.IMConn, proto *comet.Proto) error

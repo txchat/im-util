@@ -24,6 +24,7 @@ package auth
 import (
 	"bytes"
 	"encoding/base64"
+
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/protocol/frame"

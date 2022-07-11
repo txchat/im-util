@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/rs/zerolog"
 	"io"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
 func NewLogger(out ...io.Writer) zerolog.Logger {

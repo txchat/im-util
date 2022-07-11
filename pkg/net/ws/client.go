@@ -2,11 +2,12 @@ package ws
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
 	xnet "github.com/txchat/im-util/pkg/net"
 	comet "github.com/txchat/im/api/comet/grpc"
-	"time"
 )
 
 type Client struct {

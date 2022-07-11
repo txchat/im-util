@@ -24,6 +24,12 @@ package connect
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/internal/device"
@@ -31,11 +37,6 @@ import (
 	"github.com/txchat/im-util/internal/rate"
 	"github.com/txchat/im-util/internal/reader"
 	"github.com/txchat/im-util/internal/user"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
 )
 
 // keepCmd represents the keep command

@@ -3,8 +3,9 @@ package pkg
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/txchat/dtalk/pkg/util"
 	"time"
+
+	"github.com/txchat/dtalk/pkg/util"
 )
 
 const (

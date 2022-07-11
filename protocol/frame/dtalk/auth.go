@@ -2,10 +2,12 @@ package dtalk
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/dtalk/pkg/address"
 	"github.com/txchat/dtalk/pkg/auth"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
+
 	//secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
 	secp256k1_haltingstate "github.com/txchat/dtalk/pkg/crypt/secp256k1-haltingstate"
 	"github.com/txchat/im-util/protocol/frame"

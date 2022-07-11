@@ -1,8 +1,9 @@
 package net
 
 import (
-	comet "github.com/txchat/im/api/comet/grpc"
 	"time"
+
+	comet "github.com/txchat/im/api/comet/grpc"
 )
 
 type ReaderWriterCloser interface {

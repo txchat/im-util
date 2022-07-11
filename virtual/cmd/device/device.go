@@ -3,6 +3,11 @@ package device
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	xgrpc "github.com/txchat/dtalk/pkg/net/grpc"
@@ -12,10 +17,6 @@ import (
 	"github.com/txchat/im-util/internal/user"
 	deviceGRPC "github.com/txchat/im-util/virtual/grpc/device"
 	"github.com/txchat/imparse/proto"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 var Cmd = &cobra.Command{

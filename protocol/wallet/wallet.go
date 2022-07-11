@@ -1,9 +1,10 @@
 package wallet
 
 import (
+	"sync"
+
 	"github.com/33cn/chain33/types"
 	"github.com/33cn/chain33/wallet/bipwallet"
-	"sync"
 )
 
 type Wallet struct {

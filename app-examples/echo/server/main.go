@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bsm/sarama-cluster"
+	cluster "github.com/bsm/sarama-cluster"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im-util/app-examples/echo/types"
