@@ -19,11 +19,10 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "pre",
-	Short:   "",
-	Long:    "",
-	Example: "",
-	Run:     do,
+	Use:   "pre",
+	Short: "提供批量压测功能，将待分析结果输出到指定文件中",
+	Long:  `提供批量压测功能，将待分析结果输出到指定文件中。需要配和analyze分析工具，将输出结果分析成可读数据。`,
+	RunE:  pressureRunE,
 }
 
 var (
@@ -49,11 +48,11 @@ func init() {
 	Cmd.Flags().StringVarP(&totalTime, "time", "t", "20s", "")
 }
 
-func do(cmd *cobra.Command, args []string) {
+func pressureRunE(cmd *cobra.Command, args []string) error {
 	// 打开文件
 	fd, closer, err := util.WriteFile(outputPath)
 	if err != nil {
-		panic(err)
+		return err
 	}
 	defer closer()
 	outLog := xlog.NewLogger(fd)
@@ -62,13 +61,11 @@ func do(cmd *cobra.Command, args []string) {
 	// rate
 	num, tm, err := rate.ParseRateString(rateStr)
 	if err != nil {
-		log.Error().Err(err).Msg("ParseRateString error")
-		return
+		return fmt.Errorf("ParseRateString failed: %v", err)
 	}
 	ttTime, err := rate.ParseDuration(totalTime)
 	if err != nil {
-		log.Error().Err(err).Msg("ParseRateString error")
-		return
+		return fmt.Errorf("ParseDuration failed: %v", err)
 	}
 
 	log.Info().Str("server", server).
@@ -83,12 +80,11 @@ func do(cmd *cobra.Command, args []string) {
 	//读取用户信息文件，为了加快生成速度文件存储完整的助记词、私钥、公钥、地址
 	metadata, err := reader.LoadMetadata(userStorePath, readSplit)
 	if err != nil {
-		log.Error().Err(err).Msg("LoadMetadata failed")
-		return
+		return fmt.Errorf("LoadMetadata failed: %v", err)
 	}
 	if len(metadata) < userNum {
 		log.Error().Err(err).Int("len(metadata)", len(metadata)).Int("userNum", userNum).Msg("users lacking")
-		return
+		return fmt.Errorf("length of metadata less than userNum")
 	}
 	log.Info().Int("len(metadata)", len(metadata)).Int("userNum", userNum).Msg("LoadMetadata")
 
@@ -148,11 +144,11 @@ func do(cmd *cobra.Command, args []string) {
 				d.TurnOff()
 			}
 			log.Info().Msg("all job down")
-			return
+			return nil
 		case syscall.SIGHUP:
 			// TODO reload
 		default:
-			return
+			return nil
 		}
 	}
 }

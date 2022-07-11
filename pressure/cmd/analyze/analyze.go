@@ -10,11 +10,10 @@ import (
 )
 
 var Cmd = &cobra.Command{
-	Use:     "ana",
-	Short:   "",
-	Long:    "",
-	Example: "",
-	Run:     do,
+	Use:   "ana",
+	Short: "压测结果分析工具",
+	Long:  `将pressure工具的输出数据作为输入，分析得到结果输出到指定目录(用于之后的统计和可视化)`,
+	RunE:  analyzeRunE,
 }
 
 var (
@@ -27,7 +26,7 @@ func init() {
 	Cmd.Flags().StringVarP(&pressureOutputPath, "in", "i", "./pressure_output.txt", "")
 }
 
-func do(cmd *cobra.Command, args []string) {
+func analyzeRunE(cmd *cobra.Command, args []string) error {
 	// 打开文件
 	fd, closer, err := util.WriteFile(outputPath)
 	if err != nil {
@@ -41,18 +40,17 @@ func do(cmd *cobra.Command, args []string) {
 	log.Info().Msg("start analyze")
 	lines, err := util.ReadAllLines(pressureOutputPath)
 	if err != nil {
-		log.Error().Err(err).Msg("ReadFile error")
-		return
+		return fmt.Errorf("ReadAllLines failed: %v", err)
 	}
 	log.Info().Msg(fmt.Sprintf("source lines: %d", len(lines)))
 	aze := analyze.NewAnalyzeStore(lines)
 	err = aze.LoadAll()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("LoadAll failed: %v", err)
 	}
 	err = aze.Start()
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("analyze failed: %v", err)
 	}
 
 	log.Info().Msg("start print out")
@@ -63,4 +61,5 @@ func do(cmd *cobra.Command, args []string) {
 	log.Info().Msg(fmt.Sprintf("failed count: %d", aze.FailedCount()))
 	log.Info().Msg(fmt.Sprintf("message tranport success count: %d -- failed count: %d", pt.GetSuccessCount(), pt.GetFailedCount()))
 	log.Info().Msg("done")
+	return nil
 }
