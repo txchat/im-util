@@ -81,7 +81,7 @@ func (t *AnalyzeStore) Start() error {
 	for connId, connection := range t.connInfo {
 		for seq, item := range connection.allSend {
 			// send
-			tm := ts.GetTransmitMsgByConnIdSeq(connId, seq)
+			tm := ts.GetTransmitMsgByConnIDSeq(connId, seq)
 			err := tm.LoadSend("", connId, seq, item.GetTime())
 			if err != nil {
 				return err

@@ -86,5 +86,4 @@ func encryptRun(cmd *cobra.Command, args []string) {
 		}
 		cmd.Printf("encrypt by dh session key success!:%s\n", hex.EncodeToString(encryptedData))
 	}
-	return
 }

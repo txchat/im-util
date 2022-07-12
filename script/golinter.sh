@@ -16,30 +16,11 @@ function filterLinter() {
             --enable=structcheck \
             --enable=goimports \
             --enable=misspell \
-            --enable=golint \
             --exclude=underscores \
             --exclude-use-default=false
     )
-    #	    --enable=staticcheck \
-    #	    --enable=gocyclo \
-    #	    --enable=staticcheck \
-    #	    --enable=golint \
-    #	    --enable=unused \
-    #	    --enable=gotype \
-    #	    --enable=gotypex \
-
-    #    if [[ ${#res} -gt "0" ]]; then
-    #        resNoSpace=$(echo "${res}" | tr ' ' '@')
-    #        array=($(echo "${resNoSpace}" | tr '\n' '\n'))
-    #        str=""
-    #        for var in ${array[*]}; do
-    #            if ! [[ $var =~ "underscores" ]]; then
-    #                str="${str}""${var}""\\n"
-    #            fi
-    #        done
-    #        res=""
-    #        res=$(echo "${str}" | tr '@' ' ')
-    #    fi
+    # --enable=golint replaced by --enable=revive
+    # The linter 'golint' is deprecated (since v1.41.0) due to: The repository of the linter has been archived by the owner.  Replaced by revive.
     if [[ ${#res} -gt "0" ]]; then
         echo -e "${res}"
         exit 1

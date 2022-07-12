@@ -32,10 +32,13 @@ checkgofmt: ## get all go files and run go fmt on them
 		  exit 1; \
 		  fi;
 
+#linter: ## Use gometalinter check code, ignore some unserious warning
+#	@chmod +x ./script/golinter.sh
+#	@./script/golinter.sh "filter"
+#	@find . -name '*.sh' -not -path "./vendor/*" | xargs shellcheck
+
 linter: ## Use gometalinter check code, ignore some unserious warning
-	@chmod +x ./script/golinter.sh
-	@./script/golinter.sh "filter"
-	@find . -name '*.sh' -not -path "./vendor/*" | xargs shellcheck
+	@golangci-lint run ./... && find . -name '*.sh' -not -path "./vendor/*" | xargs shellcheck
 
 linter_test: ## Use gometalinter check code, for local test
 	@chmod +x ./script/golinter.sh

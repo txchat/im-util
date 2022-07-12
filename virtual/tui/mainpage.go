@@ -69,7 +69,7 @@ type mainPage struct {
 	delegateKeys  *delegateKeyMap
 }
 
-func NewMainPage() mainPage {
+func NewMainPage() *mainPage {
 	var (
 		itemGenerator randomItemGenerator
 		delegateKeys  = newDelegateKeyMap()
@@ -98,7 +98,7 @@ func NewMainPage() mainPage {
 		}
 	}
 
-	return mainPage{
+	return &mainPage{
 		list:          groceryList,
 		keys:          listKeys,
 		delegateKeys:  delegateKeys,

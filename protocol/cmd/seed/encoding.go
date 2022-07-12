@@ -72,5 +72,4 @@ func encodingRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	cmd.Printf("encrypted seed is: %s\n", hex.EncodeToString(encSeed))
-	return
 }

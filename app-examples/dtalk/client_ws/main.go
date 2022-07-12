@@ -7,7 +7,6 @@ import (
 	"flag"
 	"os"
 	"runtime"
-	"sync"
 	"time"
 
 	protoutil "github.com/txchat/im-util/internal/proto"
@@ -21,11 +20,6 @@ const (
 	ping = 2 * time.Second
 )
 
-var (
-	lck sync.RWMutex
-	seq int32
-)
-
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	flag.Parse()
@@ -35,9 +29,9 @@ func main() {
 	<-exit
 }
 
-func client(appId, token, server string) {
+func client(appID, token, server string) {
 	cli, err := net.DialIMAndServe(server, &comet.AuthMsg{
-		AppId: appId,
+		AppId: appID,
 		Token: token,
 		Ext:   nil,
 	}, 5*time.Second, ws.Auth)
@@ -47,6 +41,7 @@ func client(appId, token, server string) {
 	Send(cli)
 }
 
+// Send 发送消息
 func Send(c *net.IMConn) {
 	//write message
 	go func() {

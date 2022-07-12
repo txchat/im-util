@@ -13,7 +13,7 @@ type headerRegion struct {
 	content []byte
 }
 
-func newHeaderRegion() headerRegion {
+func NewHeaderRegion() headerRegion {
 	h := headerRegion{
 		content: make([]byte, 0),
 	}
@@ -68,7 +68,6 @@ func (m *headerRegion) loadHeadContent() error {
 	return nil
 }
 
-//
 type HeadInfo struct {
 	DeviceName string
 	DeviceType string

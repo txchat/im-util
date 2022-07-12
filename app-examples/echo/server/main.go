@@ -63,7 +63,7 @@ func newKafkaSub() *cluster.Consumer {
 }
 
 func newLogicClient(addr string) logic.LogicClient {
-	conn, err := common.NewGRPCConn(addr, time.Duration(time.Second))
+	conn, err := common.NewGRPCConn(addr, time.Second)
 	if err != nil {
 		panic(err)
 	}

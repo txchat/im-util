@@ -2,6 +2,7 @@
 
 # golangci-lint install
 # https://golangci-lint.run/usage/install/
+# darwin arm64需要从源码编译否则无法运行
 brew install golangci-lint
 brew upgrade golangci-lint
 
@@ -16,3 +17,7 @@ brew install clang-format
 # goimports install
 # https://pkg.go.dev/golang.org/x/tools/cmd/goimports
 go install golang.org/x/tools/cmd/goimports@latest
+
+# tool shellcheck install
+# https://github.com/koalaman/shellcheck#installing
+brew install shellcheck

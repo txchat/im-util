@@ -73,5 +73,4 @@ func decodingRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	cmd.Printf("decrypted seed is: %s\n", hex.EncodeToString(decSeed))
-	return
 }

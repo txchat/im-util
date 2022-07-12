@@ -2,7 +2,6 @@ package device
 
 import (
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -21,11 +20,8 @@ import (
 type OnReceiveHandler func(c *net.IMConn, proto *comet.Proto) error
 
 type Device struct {
-	u    *user.User
-	conn *net.IMConn
-	once sync.Once
-
-	//device info
+	u                *user.User
+	conn             *net.IMConn
 	uuid, deviceName string
 	deviceType       xproto.Device
 

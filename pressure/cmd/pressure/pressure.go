@@ -28,7 +28,7 @@ var Cmd = &cobra.Command{
 var (
 	userNum   int
 	server    string
-	appId     string
+	appID     string
 	rateStr   string
 	totalTime string
 
@@ -40,7 +40,7 @@ var (
 func init() {
 	Cmd.Flags().IntVarP(&userNum, "users", "u", 2, "users number")
 	Cmd.Flags().StringVarP(&server, "server", "s", "172.16.101.107:3102", "server address")
-	Cmd.Flags().StringVarP(&appId, "appId", "a", "dtalk", "")
+	Cmd.Flags().StringVarP(&appID, "appId", "a", "dtalk", "")
 	Cmd.Flags().StringVarP(&outputPath, "out", "o", "./pressure_output.txt", "")
 	Cmd.Flags().StringVarP(&userStorePath, "in", "i", "./users.txt", "users store file path")
 	Cmd.Flags().StringVarP(&readSplit, "rs", "", ",", "存储用户信息的字段分隔符[默认：,]")
@@ -69,7 +69,7 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info().Str("server", server).
-		Str("appId", appId).
+		Str("appId", appID).
 		Str("rateStr", rateStr).
 		Str("totalTime", totalTime).
 		Str("userStorePath", userStorePath).
@@ -97,7 +97,7 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 	var devices []*device.Device
 	for _, u := range users {
 		d := device.NewDevice("", "", 0, outLog, u)
-		err = d.DialIMServer(appId, server, nil)
+		err = d.DialIMServer(appID, server, nil)
 		if err != nil {
 			log.Error().Err(err).Msg("DialIMServer failed")
 			continue
