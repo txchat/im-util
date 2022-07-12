@@ -58,7 +58,7 @@ func init() {
 	docCmd.Flags().StringVarP(&dir, "dir", "d", "./", "文档输出目录")
 }
 
-func docRunE(cmd *cobra.Command, args []string) error {
+func docRunE(*cobra.Command, []string) error {
 	switch format {
 	case "man":
 		return genMan(dir + "man")

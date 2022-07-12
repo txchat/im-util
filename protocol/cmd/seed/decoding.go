@@ -1,3 +1,4 @@
+//Package seed
 /*
 Copyright © 2022 oofpgDLD <oofpgdld@gmail.com>
 

@@ -15,8 +15,8 @@ type Client struct {
 }
 
 func Auth(server string, authMsg *comet.AuthMsg) (xnet.ReaderWriterCloser, error) {
-	wsUrl := "ws://" + server + "/sub"
-	conn, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	wsURL := "ws://" + server + "/sub"
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		return nil, fmt.Errorf("auth step 1 dial: %v", err)
 	}

@@ -153,8 +153,6 @@ func client(appId, token, server string) {
 				quit <- true
 				return
 			}
-		} else {
-			// biz msg resp
 		}
 	}
 }

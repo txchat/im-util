@@ -1,3 +1,4 @@
+//Package connect
 /*
 Copyright © 2022 oofpgDLD <oofpgdld@gmail.com>
 
@@ -77,7 +78,7 @@ func init() {
 	keepCmd.Flags().StringVarP(&totalTime, "time", "t", "720h", "")
 }
 
-func keepRunE(cmd *cobra.Command, args []string) error {
+func keepRunE(*cobra.Command, []string) error {
 	start := time.Now()
 	//load users
 	log := xlog.NewLogger(os.Stdout)

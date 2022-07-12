@@ -88,7 +88,6 @@ func (ts *TransmitMsgStatic) SetTempRev(mid int64, data map[string]interface{}, 
 	ts.tempSource[mid] = source
 }
 
-//
 type TransmitMsg struct {
 	from string
 
@@ -134,19 +133,19 @@ func (tm *TransmitMsg) LoadReceive(mid int64, revTime time.Time) error {
 }
 
 //
-type analyze struct {
+type Analyze struct {
 	lines  []string
 	failed []string
 }
 
-func NewAnalyze(lines []string) *analyze {
-	return &analyze{
+func NewAnalyze(lines []string) *Analyze {
+	return &Analyze{
 		lines:  lines,
 		failed: make([]string, 0),
 	}
 }
 
-func (a *analyze) Start() error {
+func (a *Analyze) Start() error {
 	for i, line := range a.lines {
 		if line == "" {
 			continue
@@ -182,11 +181,11 @@ func (a *analyze) Start() error {
 	}
 	return nil
 }
-func (a *analyze) FailedCount() int {
+func (a *Analyze) FailedCount() int {
 	return len(a.failed)
 }
 
-func (a *analyze) send(item map[string]interface{}) error {
+func (a *Analyze) send(item map[string]interface{}) error {
 	userId := item[userIdKey].(string)
 	connId := item[connIdKey].(string)
 	seq := util.ToString(item[seqKey])
@@ -205,7 +204,7 @@ func (a *analyze) send(item map[string]interface{}) error {
 	return nil
 }
 
-func (a *analyze) ack(item map[string]interface{}) error {
+func (a *Analyze) ack(item map[string]interface{}) error {
 	connId := item[connIdKey].(string)
 	ack := util.ToString(item[ackKey])
 	mid := util.ToInt64(item[midKey])
@@ -225,7 +224,7 @@ func (a *analyze) ack(item map[string]interface{}) error {
 	return nil
 }
 
-func (a *analyze) receive(item map[string]interface{}, line string) error {
+func (a *Analyze) receive(item map[string]interface{}, line string) error {
 	mid := util.ToInt64(item[midKey])
 	timestr := item[timeKey].(string)
 	revTime, err := parseTime(timestr)

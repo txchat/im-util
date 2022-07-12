@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// connCmd represents the conn command
+// Cmd represents the conn command
 var Cmd = &cobra.Command{
 	Use:   "conn",
 	Short: "批量连接相关命令",

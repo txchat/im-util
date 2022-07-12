@@ -39,16 +39,16 @@ func main() {
 	<-exit
 }
 
-func client(appId, token, server string) {
+func client(appId, token, _ string) {
 	quit := make(chan bool, 1)
 	defer func() {
 		close(quit)
 	}()
 
 	// connnect to server
-	wsUrl := "ws://" + os.Args[3] + "/sub"
-	fmt.Println("wsUrl", wsUrl)
-	conn, _, err := websocket.DefaultDialer.Dial(wsUrl, nil)
+	wsURL := "ws://" + os.Args[3] + "/sub"
+	fmt.Println("wsUrl", wsURL)
+	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -107,7 +107,7 @@ func client(appId, token, server string) {
 			pp.Seq = GetSeq()
 			msg := fmt.Sprintf("ping:%v", pp.Seq)
 			echo := &types.EchoMsg{
-				Value: &types.EchoMsg_Ping{&types.Ping{Msg: msg}},
+				Value: &types.EchoMsg_Ping{Ping: &types.Ping{Msg: msg}},
 				Ty:    int32(types.EchoOp_PingAction),
 			}
 			body, err := proto.Marshal(echo)
@@ -153,8 +153,6 @@ func client(appId, token, server string) {
 				quit <- true
 				return
 			}
-		} else {
-			// biz msg resp
 		}
 	}
 }

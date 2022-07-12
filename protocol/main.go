@@ -23,7 +23,8 @@ package main
 
 import (
 	"github.com/txchat/im-util/protocol/cmd"
-	_ "github.com/txchat/im-util/protocol/cmd/wallet"
+	_ "github.com/txchat/im-util/protocol/frame/dtalk"
+	_ "github.com/txchat/im-util/protocol/frame/zb_otc"
 )
 
 func main() {

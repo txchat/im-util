@@ -120,7 +120,7 @@ issues:
   # it can be disabled by this option.
   # To list all excluded by default patterns execute `golangci-lint run --help`.
   # Default: true.
-  exclude-use-default: false
+  exclude-use-default: true
   # If set to true exclude and exclude-rules regular expressions become case-sensitive.
   # Default: false
   exclude-case-sensitive: false
@@ -187,6 +187,7 @@ linters:
     - deadcode
     - unconvert
     - varcheck
+    - revive
     - structcheck
     - goimports
     - misspell
@@ -196,7 +197,7 @@ linters-settings:
     # Sets the default severity.
     # See https://github.com/mgechev/revive#configuration
     # Default: warning
-    severity: error
+    severity: warning
     # Enable all available rules.
     # Default: false
     enable-all-rules: false
@@ -256,7 +257,7 @@ linters-settings:
         severity: error
         disabled: false
         arguments:
-          - ["Id"] # AllowList
+          - ["Id", "ID"] # AllowList
           - [""] # DenyList
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#var-declaration
       - name: var-declaration
@@ -293,7 +294,7 @@ linters-settings:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#empty-block
       - name: empty-block
         severity: error
-        disabled: false
+        disabled: true
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#superfluous-else
       - name: superfluous-else
         severity: error
@@ -301,7 +302,7 @@ linters-settings:
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unused-parameter
       - name: unused-parameter
         severity: error
-        disabled: false
+        disabled: true
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#unreachable-code
       - name: unreachable-code
         severity: error

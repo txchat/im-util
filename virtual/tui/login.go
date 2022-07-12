@@ -27,14 +27,14 @@ var (
 	blurredButton = fmt.Sprintf("[ %s ]", blurredStyle.Render("Submit"))
 )
 
-type loginPage struct {
+type LoginPage struct {
 	focusIndex int
 	inputs     []textinput.Model
 	cursorMode textinput.CursorMode
 }
 
-func NewLoginPage() loginPage {
-	m := loginPage{
+func NewLoginPage() LoginPage {
+	m := LoginPage{
 		inputs: make([]textinput.Model, 6),
 	}
 
@@ -74,11 +74,11 @@ func NewLoginPage() loginPage {
 	return m
 }
 
-func (m loginPage) Init() tea.Cmd {
+func (m LoginPage) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m loginPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m LoginPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -147,7 +147,7 @@ func (m loginPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m *loginPage) updateInputs(msg tea.Msg) tea.Cmd {
+func (m *LoginPage) updateInputs(msg tea.Msg) tea.Cmd {
 	var cmds = make([]tea.Cmd, len(m.inputs))
 
 	// Only text inputs with Focus() set will respond, so it's safe to simply
@@ -159,7 +159,7 @@ func (m *loginPage) updateInputs(msg tea.Msg) tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (m *loginPage) doLogin(mnc, uuid, deviceName string, deviceType int32, appId, server string) error {
+func (m *LoginPage) doLogin(mnc, uuid, deviceName string, deviceType int32, appId, server string) error {
 	// check
 	w, err := wallet.NewWalletFromMnemonic(mnc)
 	if err != nil {
@@ -182,7 +182,7 @@ func (m *loginPage) doLogin(mnc, uuid, deviceName string, deviceType int32, appI
 	return nil
 }
 
-func (m loginPage) View() string {
+func (m LoginPage) View() string {
 	var b strings.Builder
 
 	for i := range m.inputs {

@@ -6,7 +6,7 @@ help: ## Display this help screen
 
 .PHONY: fmt_proto fmt_shell fmt_go
 
-fmt: fmt_proto fmt_shell fmt_go
+fmt: fmt_proto fmt_shell fmt_go ## format all files
 
 fmt_proto: ## format protobuf file
 	@find . -name '*.proto' -not -path "./vendor/*" | xargs clang-format -i
@@ -19,6 +19,8 @@ fmt_go: ## format go
 	@find . -name '*.go' -not -path "./vendor/*" | xargs goimports -l -w
 
 .PHONY: checkgofmt linter linter_test
+
+check: checkgofmt linter ## check format and linter
 
 checkgofmt: ## get all go files and run go fmt on them
 	@files=$$(find . -name '*.go' -not -path "./vendor/*" | xargs gofmt -l -s); if [ -n "$$files" ]; then \

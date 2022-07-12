@@ -28,8 +28,6 @@ import (
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/protocol/frame"
-	_ "github.com/txchat/im-util/protocol/frame/dtalk"
-	_ "github.com/txchat/im-util/protocol/frame/zb_otc"
 	comet "github.com/txchat/im/api/comet/grpc"
 )
 

@@ -8,21 +8,21 @@ import (
 	"github.com/txchat/dtalk/pkg/util"
 )
 
-type tiledRev struct {
+type TiledRev struct {
 	connId map[string]int
 }
 
-func NewTiledRev() *tiledRev {
-	return &tiledRev{
+func NewTiledRev() *TiledRev {
+	return &TiledRev{
 		connId: make(map[string]int),
 	}
 }
 
-func (t *tiledRev) LoadConn(connId string) {
+func (t *TiledRev) LoadConn(connId string) {
 	t.connId[connId]++
 }
 
-func (t *tiledRev) ExceptConnId(connId string) string {
+func (t *TiledRev) ExceptConnId(connId string) string {
 	for cid := range t.connId {
 		if cid != connId {
 			return cid
@@ -31,25 +31,25 @@ func (t *tiledRev) ExceptConnId(connId string) string {
 	return ""
 }
 
-type AnalyzeStore struct {
+type Store struct {
 	lines  []string
 	failed []string
 
 	//key: connId
 	connInfo map[string]*Connection
-	tileRev  map[int64]*tiledRev
+	tileRev  map[int64]*TiledRev
 }
 
-func NewAnalyzeStore(lines []string) *AnalyzeStore {
-	return &AnalyzeStore{
+func NewAnalyzeStore(lines []string) *Store {
+	return &Store{
 		lines:    lines,
 		failed:   make([]string, 0),
 		connInfo: make(map[string]*Connection),
-		tileRev:  make(map[int64]*tiledRev),
+		tileRev:  make(map[int64]*TiledRev),
 	}
 }
 
-func (t *AnalyzeStore) LoadAll() error {
+func (t *Store) LoadAll() error {
 	for i, line := range t.lines {
 		if line == "" {
 			continue
@@ -76,7 +76,7 @@ func (t *AnalyzeStore) LoadAll() error {
 	return nil
 }
 
-func (t *AnalyzeStore) Start() error {
+func (t *Store) Start() error {
 	ts := GetTransmitMsgStatic()
 	for connId, connection := range t.connInfo {
 		for seq, item := range connection.allSend {
@@ -113,15 +113,15 @@ func (t *AnalyzeStore) Start() error {
 	return nil
 }
 
-func (t *AnalyzeStore) FailedCount() int {
+func (t *Store) FailedCount() int {
 	return len(t.failed)
 }
 
-func (t *AnalyzeStore) TileRev() {
+func (t *Store) TileRev() {
 	// key:mid, val: connId
 	for connId, connection := range t.connInfo {
 		for mid := range connection.allRev {
-			var xx *tiledRev
+			var xx *TiledRev
 			var ok bool
 			if xx, ok = t.tileRev[mid]; !ok {
 				xx = NewTiledRev()
@@ -132,7 +132,7 @@ func (t *AnalyzeStore) TileRev() {
 	}
 }
 
-func (t *AnalyzeStore) getRevItem(connId string, mid int64) *RevItem {
+func (t *Store) getRevItem(connId string, mid int64) *RevItem {
 	c := t.connInfo[connId]
 	if c == nil {
 		return nil
@@ -140,7 +140,7 @@ func (t *AnalyzeStore) getRevItem(connId string, mid int64) *RevItem {
 	return c.allRev[mid]
 }
 
-func (t *AnalyzeStore) parseSend(item map[string]interface{}) error {
+func (t *Store) parseSend(item map[string]interface{}) error {
 	//userId := item[userIdKey].(string)
 	connId := item[connIdKey].(string)
 	seq := util.ToString(item[seqKey])
@@ -155,7 +155,7 @@ func (t *AnalyzeStore) parseSend(item map[string]interface{}) error {
 	return nil
 }
 
-func (t *AnalyzeStore) parseAck(item map[string]interface{}) error {
+func (t *Store) parseAck(item map[string]interface{}) error {
 	connId := item[connIdKey].(string)
 	ack := util.ToString(item[ackKey])
 	mid := util.ToInt64(item[midKey])
@@ -170,7 +170,7 @@ func (t *AnalyzeStore) parseAck(item map[string]interface{}) error {
 	return nil
 }
 
-func (t *AnalyzeStore) parseReceive(item map[string]interface{}) error {
+func (t *Store) parseReceive(item map[string]interface{}) error {
 	connId := item[connIdKey].(string)
 	mid := util.ToInt64(item[midKey])
 	timestr := item[timeKey].(string)
@@ -184,7 +184,7 @@ func (t *AnalyzeStore) parseReceive(item map[string]interface{}) error {
 	return nil
 }
 
-func (t *AnalyzeStore) getConn(connId string) *Connection {
+func (t *Store) getConn(connId string) *Connection {
 	var c *Connection
 	var ok bool
 	if c, ok = t.connInfo[connId]; !ok {

@@ -27,7 +27,7 @@ func init() {
 	Cmd.Flags().StringVarP(&pressureOutputPath, "in", "i", "./pressure_output.txt", "")
 }
 
-func analyzeRunE(cmd *cobra.Command, args []string) error {
+func analyzeRunE(*cobra.Command, []string) error {
 	// 打开文件
 	fd, closer, err := util.WriteFile(outputPath)
 	if err != nil {
