@@ -1,4 +1,4 @@
-name: golangci-lint
+name: static-analysis
 on:
   push:
     tags:
@@ -10,10 +10,22 @@ on:
   workflow_dispatch:
 
 jobs:
+  gofmtcheck:
+    name: gofmt
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: 1.17
+      - uses: actions/checkout@v3
+      - name: run check format shell
+        run: |
+          make checkgofmt
+        shell: bash
   # https://github.com/marketplace/actions/run-golangci-lint
   golangci:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/setup-go@v3
         with:
@@ -27,8 +39,8 @@ jobs:
   # https://github.com/marketplace/actions/shellcheck
   shellcheck:
     name: Shellcheck
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
-      - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@master
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@1.1.0
