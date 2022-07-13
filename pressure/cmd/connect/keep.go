@@ -1,3 +1,4 @@
+//Package connect
 /*
 Copyright © 2022 oofpgDLD <oofpgdld@gmail.com>
 
@@ -24,6 +25,12 @@ package connect
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 	"github.com/txchat/im-util/internal/device"
@@ -31,11 +38,6 @@ import (
 	"github.com/txchat/im-util/internal/rate"
 	"github.com/txchat/im-util/internal/reader"
 	"github.com/txchat/im-util/internal/user"
-	"os"
-	"os/signal"
-	"sync"
-	"syscall"
-	"time"
 )
 
 // keepCmd represents the keep command
@@ -76,7 +78,7 @@ func init() {
 	keepCmd.Flags().StringVarP(&totalTime, "time", "t", "720h", "")
 }
 
-func keepRunE(cmd *cobra.Command, args []string) error {
+func keepRunE(*cobra.Command, []string) error {
 	start := time.Now()
 	//load users
 	log := xlog.NewLogger(os.Stdout)

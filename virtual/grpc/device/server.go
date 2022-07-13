@@ -2,6 +2,9 @@ package device
 
 import (
 	"context"
+	"io"
+	"time"
+
 	xgrpc "github.com/txchat/dtalk/pkg/net/grpc"
 	"github.com/txchat/im-util/internal/device"
 	protoutil "github.com/txchat/im-util/internal/proto"
@@ -10,8 +13,6 @@ import (
 	comet "github.com/txchat/im/api/comet/grpc"
 	xproto "github.com/txchat/imparse/proto"
 	"google.golang.org/grpc"
-	"io"
-	"time"
 )
 
 type Server struct {

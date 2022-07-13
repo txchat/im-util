@@ -62,14 +62,14 @@ func newListKeyMap() *listKeyMap {
 	}
 }
 
-type mainPage struct {
+type MainPage struct {
 	list          list.Model
 	itemGenerator *randomItemGenerator
 	keys          *listKeyMap
 	delegateKeys  *delegateKeyMap
 }
 
-func NewMainPage() mainPage {
+func NewMainPage() *MainPage {
 	var (
 		itemGenerator randomItemGenerator
 		delegateKeys  = newDelegateKeyMap()
@@ -98,7 +98,7 @@ func NewMainPage() mainPage {
 		}
 	}
 
-	return mainPage{
+	return &MainPage{
 		list:          groceryList,
 		keys:          listKeys,
 		delegateKeys:  delegateKeys,
@@ -106,11 +106,11 @@ func NewMainPage() mainPage {
 	}
 }
 
-func (m mainPage) Init() tea.Cmd {
+func (m MainPage) Init() tea.Cmd {
 	return tea.EnterAltScreen
 }
 
-func (m mainPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m MainPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -158,6 +158,6 @@ func (m mainPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(cmds...)
 }
 
-func (m mainPage) View() string {
+func (m MainPage) View() string {
 	return appStyle.Render(m.list.View())
 }

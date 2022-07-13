@@ -68,5 +68,4 @@ func sessionRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	cmd.Printf("generate session key success!:%s\n", hex.EncodeToString(sessionKey))
-	return
 }

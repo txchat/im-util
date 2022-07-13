@@ -2,9 +2,10 @@ package device
 
 import (
 	"context"
+	"time"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/keepalive"
-	"time"
 )
 
 type Client struct {

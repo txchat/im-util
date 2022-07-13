@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/txchat/im-util/pkg/util"
 	"os"
 	"testing"
+
+	"github.com/txchat/im-util/pkg/util"
 )
 
 func Test_ConsoleLogger(t *testing.T) {

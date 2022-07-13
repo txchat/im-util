@@ -3,17 +3,18 @@ package tui
 import (
 	"bufio"
 	"bytes"
-	tea "github.com/charmbracelet/bubbletea"
 	"io/ioutil"
 	"text/template"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
-type headerRegion struct {
+type HeaderRegion struct {
 	content []byte
 }
 
-func newHeaderRegion() headerRegion {
-	h := headerRegion{
+func NewHeaderRegion() HeaderRegion {
+	h := HeaderRegion{
 		content: make([]byte, 0),
 	}
 	if err := h.loadHeadContent(); err != nil {
@@ -22,19 +23,19 @@ func newHeaderRegion() headerRegion {
 	return h
 }
 
-func (m headerRegion) Init() tea.Cmd {
+func (m HeaderRegion) Init() tea.Cmd {
 	return nil
 }
 
-func (m headerRegion) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m HeaderRegion) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m headerRegion) View() string {
+func (m HeaderRegion) View() string {
 	return string(m.content)
 }
 
-func (m *headerRegion) loadHeadContent() error {
+func (m *HeaderRegion) loadHeadContent() error {
 	//init head
 	h := HeadInfo{
 		DeviceName: "",
@@ -67,7 +68,6 @@ func (m *headerRegion) loadHeadContent() error {
 	return nil
 }
 
-//
 type HeadInfo struct {
 	DeviceName string
 	DeviceType string

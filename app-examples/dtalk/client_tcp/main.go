@@ -29,9 +29,9 @@ func main() {
 	<-exit
 }
 
-func client(appId, token, server string) {
+func client(appID, token, server string) {
 	cli, err := net.DialIMAndServe(server, &comet.AuthMsg{
-		AppId: appId,
+		AppId: appID,
 		Token: token,
 		Ext:   nil,
 	}, 5*time.Second, tcp.Auth)

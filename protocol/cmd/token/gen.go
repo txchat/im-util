@@ -23,10 +23,11 @@ package token
 
 import (
 	"encoding/hex"
+	"time"
+
 	"github.com/spf13/cobra"
 	"github.com/txchat/dtalk/pkg/auth"
 	"github.com/txchat/im-util/protocol/wallet"
-	"time"
 )
 
 // genCmd represents the gen command

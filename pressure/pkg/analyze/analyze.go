@@ -7,7 +7,7 @@ import (
 
 const (
 	actionKey = "action"
-	userIdKey = "user_id"
+	//userIdKey = "user_id"
 	connIdKey = "conn_id"
 	seqKey    = "seq"
 	ackKey    = "ack"
@@ -36,8 +36,8 @@ type TransmitMsgStatic struct {
 	allTransmitMsg map[string]*TransmitMsg
 }
 
-func keyConnSeq(conId, seq string) string {
-	return fmt.Sprintf("%s-%s", conId, seq)
+func keyConnSeq(conID, seq string) string {
+	return fmt.Sprintf("%s-%s", conID, seq)
 }
 
 func GetTransmitMsgStatic() *TransmitMsgStatic {
@@ -48,12 +48,12 @@ func (ts *TransmitMsgStatic) GetAllTransmitMsgCount() int {
 	return len(ts.allTransmitMsg)
 }
 
-func (ts *TransmitMsgStatic) GetTransmitMsgByConnIdSeq(connId, seq string) *TransmitMsg {
+func (ts *TransmitMsgStatic) GetTransmitMsgByConnIDSeq(connId, seq string) *TransmitMsg {
 	var tm *TransmitMsg
 	var ok bool
 	if tm, ok = ts.allTransmitMsg[keyConnSeq(connId, seq)]; !ok {
 		tm = &TransmitMsg{
-			connId: connId,
+			connID: connId,
 			seq:    seq,
 		}
 		ts.allTransmitMsg[keyConnSeq(connId, seq)] = tm
@@ -61,11 +61,10 @@ func (ts *TransmitMsgStatic) GetTransmitMsgByConnIdSeq(connId, seq string) *Tran
 	return tm
 }
 
-//
 type TransmitMsg struct {
 	from string
 
-	connId string
+	connID string
 	seq    string
 	mid    int64
 
@@ -76,8 +75,8 @@ type TransmitMsg struct {
 	state int
 }
 
-func (tm *TransmitMsg) LoadSend(from, connId, seq string, sendTime time.Time) error {
-	if connId != tm.connId || seq != tm.seq {
+func (tm *TransmitMsg) LoadSend(from, connID, seq string, sendTime time.Time) error {
+	if connID != tm.connID || seq != tm.seq {
 		return fmt.Errorf("")
 	}
 	tm.from = from
@@ -86,8 +85,8 @@ func (tm *TransmitMsg) LoadSend(from, connId, seq string, sendTime time.Time) er
 	return nil
 }
 
-func (tm *TransmitMsg) LoadAck(connId, ack string, mid int64, ackTime time.Time) error {
-	if connId != tm.connId || ack != tm.seq {
+func (tm *TransmitMsg) LoadAck(connID, ack string, mid int64, ackTime time.Time) error {
+	if connID != tm.connID || ack != tm.seq {
 		return fmt.Errorf("err connid seq")
 	}
 	if tm.mid == 0 {

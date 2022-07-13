@@ -25,6 +25,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
+
 	"github.com/spf13/cobra"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
 )

@@ -1,8 +1,11 @@
 package auth
 
 import (
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
+	_ "github.com/txchat/im-util/protocol/frame/dtalk"
+	_ "github.com/txchat/im-util/protocol/frame/zb_otc"
 )
 
 func Test_checkRunE(t *testing.T) {

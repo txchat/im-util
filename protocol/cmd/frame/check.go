@@ -1,3 +1,4 @@
+// Package frame
 /*
 Copyright © 2022 oofpgDLD <oofpgdld@gmail.com>
 
@@ -24,6 +25,7 @@ package frame
 import (
 	"bytes"
 	"encoding/base64"
+
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/spf13/cobra"
 	comet "github.com/txchat/im/api/comet/grpc"

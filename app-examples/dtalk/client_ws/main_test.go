@@ -54,7 +54,7 @@ func Test_AuthFlame(t *testing.T) {
 	p := new(comet.Proto)
 	p.Ver = 1
 	p.Op = int32(comet.Op_Auth)
-	p.Seq = seq
+	p.Seq = 0
 	p.Body, _ = proto.Marshal(authMsg)
 	t.Log(base64.StdEncoding.EncodeToString(testWt(p)))
 }

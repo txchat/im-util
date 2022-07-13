@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bsm/sarama-cluster"
+	cluster "github.com/bsm/sarama-cluster"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im-util/app-examples/echo/types"
@@ -63,7 +63,7 @@ func newKafkaSub() *cluster.Consumer {
 }
 
 func newLogicClient(addr string) logic.LogicClient {
-	conn, err := common.NewGRPCConn(addr, time.Duration(time.Second))
+	conn, err := common.NewGRPCConn(addr, time.Second)
 	if err != nil {
 		panic(err)
 	}

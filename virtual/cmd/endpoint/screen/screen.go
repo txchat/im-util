@@ -3,14 +3,15 @@ package screen
 import (
 	"context"
 	"fmt"
-	"github.com/rs/zerolog"
-	"github.com/spf13/cobra"
-	pb "github.com/txchat/im-util/virtual/grpc/device/api"
-	xproto "github.com/txchat/imparse/proto"
 	"io"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/rs/zerolog"
+	"github.com/spf13/cobra"
+	pb "github.com/txchat/im-util/virtual/grpc/device/api"
+	xproto "github.com/txchat/imparse/proto"
 )
 
 var Cmd = &cobra.Command{

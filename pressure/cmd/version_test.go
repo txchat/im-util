@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/spf13/cobra"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func executeCommand(root *cobra.Command, args ...string) (output string, err error) {

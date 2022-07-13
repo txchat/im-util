@@ -2,6 +2,7 @@ package dtalk
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/dtalk/service/auth/model"
 	"github.com/txchat/im-util/protocol/frame"

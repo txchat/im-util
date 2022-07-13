@@ -1,3 +1,4 @@
+// Package dh
 /*
 Copyright © 2022 oofpgDLD <oofpgdld@gmail.com>
 
@@ -60,7 +61,7 @@ func init() {
 	decryptCmd.MarkFlagRequired("metadata")
 }
 
-func decryptRun(cmd *cobra.Command, args []string) {
+func decryptRun(cmd *cobra.Command, _ []string) {
 	privateKey = strings.Replace(privateKey, "0x", "", 1)
 	publicKey = strings.Replace(publicKey, "0x", "", 1)
 	sessionKey = strings.Replace(sessionKey, "0x", "", 1)
@@ -86,5 +87,4 @@ func decryptRun(cmd *cobra.Command, args []string) {
 		}
 		cmd.Printf("decrypted by dh session key success!:%s\n", hex.EncodeToString(decryptedData))
 	}
-	return
 }

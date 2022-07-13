@@ -2,10 +2,12 @@ package dtalk
 
 import (
 	"fmt"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/dtalk/pkg/address"
 	"github.com/txchat/dtalk/pkg/auth"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
+
 	//secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
 	secp256k1_haltingstate "github.com/txchat/dtalk/pkg/crypt/secp256k1-haltingstate"
 	"github.com/txchat/im-util/protocol/frame"
@@ -40,7 +42,7 @@ func (t *authChecker) Check(p *comet.Proto) (err error) {
 		return
 	}
 
-	if !t.checkAppId(authFrame.AppId) {
+	if !t.checkAppID(authFrame.AppId) {
 		err = fmt.Errorf("%v: %s", frame.ErrInvalidAppId, authFrame.AppId)
 		return
 	}
@@ -69,9 +71,9 @@ func (t *authChecker) Check(p *comet.Proto) (err error) {
 func (t *authChecker) Set(key string, val interface{}) {
 	switch key {
 	case "isCkTimeOut":
-		switch val.(type) {
+		switch val := val.(type) {
 		case bool:
-			t.isCkTimeOut = val.(bool)
+			t.isCkTimeOut = val
 		default:
 			fmt.Printf("%T\n", val)
 		}
@@ -80,7 +82,7 @@ func (t *authChecker) Set(key string, val interface{}) {
 	}
 }
 
-func (t *authChecker) checkAppId(input string) bool {
+func (t *authChecker) checkAppID(input string) bool {
 	switch input {
 	case "dtalk":
 		return true

@@ -2,10 +2,11 @@ package net
 
 import (
 	"fmt"
-	"github.com/google/uuid"
-	comet "github.com/txchat/im/api/comet/grpc"
 	"sync/atomic"
 	"time"
+
+	"github.com/google/uuid"
+	comet "github.com/txchat/im/api/comet/grpc"
 )
 
 type IMConn struct {

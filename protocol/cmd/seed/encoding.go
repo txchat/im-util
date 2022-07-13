@@ -23,9 +23,10 @@ package seed
 
 import (
 	"encoding/hex"
+	"strings"
+
 	"github.com/33cn/chain33/wallet"
 	"github.com/spf13/cobra"
-	"strings"
 )
 
 // encodingCmd represents the encoding command
@@ -71,5 +72,4 @@ func encodingRun(cmd *cobra.Command, args []string) {
 		return
 	}
 	cmd.Printf("encrypted seed is: %s\n", hex.EncodeToString(encSeed))
-	return
 }

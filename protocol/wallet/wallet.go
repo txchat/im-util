@@ -1,9 +1,10 @@
 package wallet
 
 import (
+	"sync"
+
 	"github.com/33cn/chain33/types"
 	"github.com/33cn/chain33/wallet/bipwallet"
-	"sync"
 )
 
 type Wallet struct {
@@ -24,13 +25,13 @@ func CreateNewWallet() (*Wallet, error) {
 	if err != nil {
 		return nil, err
 	}
-	priv, pub, err := wallet.NewKeyPair(0)
+	private, pub, err := wallet.NewKeyPair(0)
 	if err != nil {
 		return nil, err
 	}
 	w := Wallet{
 		wallet:     wallet,
-		privateKey: priv,
+		privateKey: private,
 		publicKey:  pub,
 		mnemonic:   mne,
 	}
@@ -167,7 +168,7 @@ func (mc *ProduceCreator) Foreach(start, end int) Iterator {
 	}
 }
 
-func (mc *ProduceCreator) NewWallet(v interface{}) (*Wallet, error) {
+func (mc *ProduceCreator) NewWallet(_ interface{}) (*Wallet, error) {
 	return CreateNewWallet()
 }
 

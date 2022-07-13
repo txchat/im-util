@@ -2,6 +2,7 @@ package signature
 
 import (
 	"bytes"
+
 	"github.com/spf13/cobra"
 )
 
