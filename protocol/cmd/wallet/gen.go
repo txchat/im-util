@@ -49,6 +49,7 @@ var (
 	readSplit  string
 	writeSplit string
 	display    bool
+	addrType   int32
 )
 
 func init() {
@@ -69,6 +70,7 @@ func init() {
 	genCmd.Flags().StringVarP(&readSplit, "rs", "", ",", "[read must] read split")
 	genCmd.Flags().StringVarP(&writeSplit, "ws", "", ",", "[write must] write split")
 	genCmd.Flags().BoolVarP(&display, "display", "d", false, "display enable flag")
+	genCmd.Flags().Int32VarP(&addrType, "type", "t", 0, "address type, default 0; enum:[0]-btc, [1]-btcMultiSign, [2]-eth")
 
 	genCmd.MarkFlagsRequiredTogether("write", "ws")
 	genCmd.MarkFlagsRequiredTogether("read", "rs")
@@ -109,7 +111,7 @@ func genWallet(cmd *cobra.Command, args []string) {
 
 	metadata := make([]*wallet.Metadata, len(users))
 	for i, user := range users {
-		md, err := wallet.FormatMetadataFromWallet(user)
+		md, err := wallet.FormatMetadataFromWallet(addrType, user)
 		if err != nil {
 			cmd.PrintErrf("wallet to metadata failed: %v\n", err)
 			return

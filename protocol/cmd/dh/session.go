@@ -25,9 +25,8 @@ import (
 	"encoding/hex"
 	"strings"
 
-	walletapi "github.com/txchat/chatcipher"
-
 	"github.com/spf13/cobra"
+	"github.com/txchat/im-util/protocol/dh"
 )
 
 // sessionCmd represents the session command
@@ -62,9 +61,9 @@ func sessionRun(cmd *cobra.Command, args []string) {
 	privateKey = strings.Replace(privateKey, "0x", "", 1)
 	publicKey = strings.Replace(publicKey, "0x", "", 1)
 
-	sessionKey, err := walletapi.GenerateDHSessionKey(privateKey, publicKey)
+	sessionKey, err := dh.GenerateDHSessionKey(privateKey, publicKey)
 	if err != nil {
-		cmd.PrintErr("walletapi.GenerateDHSessionKey failed: %v\n", err)
+		cmd.PrintErrf("dh.GenerateDHSessionKey failed: %v\n", err)
 		return
 	}
 	cmd.Printf("generate session key success!:%s\n", hex.EncodeToString(sessionKey))

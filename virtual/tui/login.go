@@ -165,7 +165,7 @@ func (m *LoginPage) doLogin(mnc, uuid, deviceName string, deviceType int32, appI
 	if err != nil {
 		return err
 	}
-	md, err := wallet.FormatMetadataFromWallet(w)
+	md, err := wallet.FormatMetadataFromWallet(0, w)
 	if err != nil {
 		return err
 	}
