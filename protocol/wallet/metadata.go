@@ -3,9 +3,10 @@ package wallet
 import (
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"strings"
 
-	"github.com/33cn/chain33/wallet/bipwallet"
+	"github.com/33cn/chain33/common/address"
 )
 
 type Metadata struct {
@@ -15,16 +16,16 @@ type Metadata struct {
 	address    string
 }
 
-func FormatMetadataFromWallet(w *Wallet) (*Metadata, error) {
-	address, err := bipwallet.PubToAddress(w.publicKey)
-	if err != nil {
-		return nil, err
+func FormatMetadataFromWallet(addrType int32, w *Wallet) (*Metadata, error) {
+	addr := address.PubKeyToAddr(addrType, w.publicKey)
+	if addr == "" {
+		return nil, fmt.Errorf("address type[%d] generate empty address", addrType)
 	}
 	return &Metadata{
 		privateKey: w.privateKey,
 		publicKey:  w.publicKey,
 		mnemonic:   w.mnemonic,
-		address:    address,
+		address:    addr,
 	}, nil
 }
 
@@ -32,7 +33,7 @@ func FormatMetadata(row, split string) (*Metadata, error) {
 	var privateKey []byte
 	var publicKey []byte
 	mne := row
-	address := ""
+	addr := ""
 
 	if split != "" {
 		var err error
@@ -41,7 +42,7 @@ func FormatMetadata(row, split string) (*Metadata, error) {
 			return nil, errors.New("item number is not 4")
 		}
 		mne = items[0]
-		address = items[3]
+		addr = items[3]
 		privateKey, err = hex.DecodeString(items[1])
 		if err != nil {
 			return nil, err
@@ -55,7 +56,7 @@ func FormatMetadata(row, split string) (*Metadata, error) {
 		privateKey: privateKey,
 		publicKey:  publicKey,
 		mnemonic:   mne,
-		address:    address,
+		address:    addr,
 	}, nil
 }
 

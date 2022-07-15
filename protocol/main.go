@@ -22,6 +22,8 @@ THE SOFTWARE.
 package main
 
 import (
+	_ "github.com/33cn/chain33/system/address/btc"
+	_ "github.com/33cn/chain33/system/address/eth"
 	"github.com/txchat/im-util/protocol/cmd"
 	_ "github.com/txchat/im-util/protocol/frame/dtalk"
 	_ "github.com/txchat/im-util/protocol/frame/zb_otc"
