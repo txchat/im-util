@@ -25,9 +25,8 @@ import (
 	"encoding/hex"
 	"strings"
 
-	walletapi "github.com/txchat/chatcipher"
-
 	"github.com/spf13/cobra"
+	"github.com/txchat/im-util/protocol/dh"
 )
 
 // encryptCmd represents the encrypt command
@@ -66,22 +65,22 @@ func encryptRun(cmd *cobra.Command, args []string) {
 	sessionKey = strings.Replace(sessionKey, "0x", "", 1)
 	data, err := hex.DecodeString(strings.Replace(metadata, "0x", "", 1))
 	if err != nil {
-		cmd.PrintErr("hex.DecodeString metadata failed:%v\n", err)
+		cmd.PrintErrf("hex.DecodeString metadata failed:%v\n", err)
 		return
 	}
 
 	//优先秘钥对加密
 	if privateKey != "" && publicKey != "" {
-		encryptedData, err := walletapi.EncryptWithDHKeyPair(privateKey, publicKey, data)
+		encryptedData, err := dh.EncryptWithDHKeyPair(privateKey, publicKey, data)
 		if err != nil {
-			cmd.PrintErr("walletapi.EncryptWithDHKeyPair failed err:%v\n", err)
+			cmd.PrintErrf("dh.EncryptWithDHKeyPair failed err:%v\n", err)
 			return
 		}
 		cmd.Printf("encrypt by dh key pair success!:%s\n", hex.EncodeToString(encryptedData))
 	} else {
-		encryptedData, err := walletapi.EncryptSymmetric(sessionKey, data)
+		encryptedData, err := dh.EncryptSymmetric(sessionKey, data)
 		if err != nil {
-			cmd.PrintErr("walletapi.EncryptSymmetric failed err:%v\n", err)
+			cmd.PrintErrf("dh.EncryptSymmetric failed err:%v\n", err)
 			return
 		}
 		cmd.Printf("encrypt by dh session key success!:%s\n", hex.EncodeToString(encryptedData))

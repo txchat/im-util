@@ -5,7 +5,7 @@ TARGETDIR=target
 HOSTARCH=$(shell uname -m)
 HOSTOS=$(shell uname -s | tr '[:upper:]' '[:lower:]')
 
-GOBASE=CGO_ENABLED=1 GO111MODULE=on GOPROXY=https://goproxy.cn,direct GOSUMDB="sum.golang.google.cn"
+GOBASE=CGO_ENABLED=0 GO111MODULE=on GOPROXY=https://goproxy.cn,direct GOSUMDB="sum.golang.google.cn"
 GOENV=GOOS=$(HOSTOS) GOARCH=$(HOSTARCH) ${GOBASE}
 
 # 编译时动态注入的参数
