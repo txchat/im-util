@@ -1,34 +1,34 @@
 # golang1.17 or latest
-TARGETDIR=target
 
 # machine x
-HOSTARCH=$(shell uname -m)
-HOSTOS=$(shell uname -s | tr '[:upper:]' '[:lower:]')
+GO_OS_ARCH=$(shell go version | awk '{ print $$4 }')
+HOST_ARCH=$(shell echo "${GO_OS_ARCH}" | awk -F '/' '{ print $$2 }')
+HOST_OS=$(shell echo "${GO_OS_ARCH}" | awk -F '/' '{ print $$1 }')
 
-GOBASE=CGO_ENABLED=1 GO111MODULE=on GOPROXY=https://goproxy.cn,direct GOSUMDB="sum.golang.google.cn"
-GOENV=GOOS=$(HOSTOS) GOARCH=$(HOSTARCH) ${GOBASE}
+# go build env
+GO_ENV_BASE=CGO_ENABLED=0 GO111MODULE=on GOPROXY=https://goproxy.cn,direct GOSUMDB="sum.golang.google.cn"
+GO_ENV=GOOS=$(HOST_OS) GOARCH=$(HOST_ARCH) ${GO_ENV_BASE}
 
-# 编译时动态注入的参数
-versionFilePath = cmd
-projectVersion=$(shell git describe --abbrev=8 --tags || git rev-parse --short=8 HEAD)
-goVersion=$(shell go version | awk '{ print $$3 }')
-gitCommit=$(shell git rev-parse --short=8 HEAD)
-buildTime=$(shell date "+%Y-%m-%d %H:%M:%S %Z")
-osArch="$(HOSTOS)/$(HOSTARCH)"
+# building injected params
+version_file_path = cmd
+project_version=$(shell git describe --abbrev=8 --tags || git rev-parse --short=8 HEAD)
+go_version=$(shell go version | awk '{ print $$3 }')
+git_commit=$(shell git rev-parse --short=8 HEAD)
+build_time=$(shell date "+%Y-%m-%d %H:%M:%S %Z")
 
-pkgCommitName=${projectVersion}_${gitCommit}
-TAR_MACHINE := ${HOSTOS}_${HOSTARCH}
+#pkg_commit_name=${project_version}_${git_commit}
+TARGET_DIR=target
 APP_NAME := virtual
 
 # flags
 #issue1221: https://github.com/spf13/cobra/issues/1221
 #pr39: https://github.com/mittwald/mittnite/pull/39
 BUILD_FLAGS = -ldflags "\
--X 'github.com/txchat/im-util/protocol/$(versionFilePath).projectVersion=$(projectVersion)' \
--X 'github.com/txchat/im-util/protocol/$(versionFilePath).goVersion=$(goVersion)' \
--X 'github.com/txchat/im-util/protocol/$(versionFilePath).gitCommit=$(gitCommit)' \
--X 'github.com/txchat/im-util/protocol/$(versionFilePath).buildTime=$(buildTime)' \
--X 'github.com/txchat/im-util/protocol/$(versionFilePath).osArch=$(osArch)' \
+-X 'github.com/txchat/im-util/protocol/$(version_file_path).projectVersion=$(project_version)' \
+-X 'github.com/txchat/im-util/protocol/$(version_file_path).goVersion=$(go_version)' \
+-X 'github.com/txchat/im-util/protocol/$(version_file_path).gitCommit=$(git_commit)' \
+-X 'github.com/txchat/im-util/protocol/$(version_file_path).buildTime=$(build_time)' \
+-X 'github.com/txchat/im-util/protocol/$(version_file_path).osArch=$(GO_OS_ARCH)' \
 -X 'google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn'"
 
 help: ## Display this help screen
@@ -39,13 +39,13 @@ help: ## Display this help screen
 .PHONY: clean build build_% test_%
 
 build:  ## 编译本机系统和指令集的可执行文件
-	$(GOENV) go build $(BUILD_FLAGS) -v -o ${TARGETDIR}/${APP_NAME}_${TAR_MACHINE} main.go
+	$(GO_ENV) go build $(BUILD_FLAGS) -v -o ${TARGET_DIR}/${APP_NAME}_${HOST_OS}_${HOST_ARCH} main.go
 
 build_%:  ## 编译目标机器的可执行文件（例如: make build_linux_amd64）
 	TAR_OS=$(shell echo $* | awk -F'_' '{print $$1}'); \
 	TAR_ARCH=$(shell echo $* | awk -F'_' '{print $$2}'); \
-	GOOS=$${TAR_OS} GOARCH=$${TAR_ARCH} go build $(BUILD_FLAGS) -v -o ${TARGETDIR}/${APP_NAME}_$${TAR_OS}_$${TAR_ARCH} main.go
+	GOOS=$${TAR_OS} GOARCH=$${TAR_ARCH} ${GO_ENV_BASE} go build $(BUILD_FLAGS) -v -o ${TARGET_DIR}/${APP_NAME}_$${TAR_OS}_$${TAR_ARCH} main.go
 
 clean: ## Remove previous build
-	@rm -rf ${TARGETDIR}
+	@rm -rf ${TARGET_DIR}
 	@go clean
