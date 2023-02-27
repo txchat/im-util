@@ -8,6 +8,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/txchat/im-util/pkg/net/tcp"
+
 	"github.com/33cn/chain33/common/address"
 	"github.com/33cn/chain33/types"
 	"github.com/33cn/chain33/wallet/bipwallet"
@@ -23,12 +25,14 @@ import (
 var (
 	log           zerolog.Logger
 	appId, server string
+	scheme        string
 )
 
 func init() {
 	log = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	flag.StringVar(&appId, "appId", "dtalk", "")
 	flag.StringVar(&server, "server", "127.0.0.1:3102", "")
+	flag.StringVar(&scheme, "scheme", "websocket", "")
 }
 
 func main() {
@@ -43,7 +47,7 @@ func main() {
 		log.Error().Err(err).Msg("create user a failed")
 		os.Exit(1)
 	}
-	connA, err := dial(a, func(conn *net.IMConn) {
+	connA, err := dial(scheme, a, func(conn *net.IMConn) {
 		for {
 			select {
 			case <-closer:
@@ -106,7 +110,7 @@ func main() {
 		log.Error().Err(err).Msg("create user b failed")
 		os.Exit(1)
 	}
-	_, err = dial(b, func(conn *net.IMConn) {
+	_, err = dial(scheme, b, func(conn *net.IMConn) {
 		for {
 			select {
 			case <-closer:
@@ -182,6 +186,15 @@ func main() {
 	}
 }
 
+func Scheme(scheme string) net.AuthHandler {
+	switch scheme {
+	case "tcp":
+		return tcp.Auth
+	default:
+		return ws.Auth
+	}
+}
+
 func newUser() (*user.User, error) {
 	//创建助记词
 	mne, err := bipwallet.NewMnemonicString(1, 160)
@@ -201,12 +214,13 @@ func newUser() (*user.User, error) {
 	return user.NewUser(addr, private, public), nil
 }
 
-func dial(u *user.User, cb func(conn *net.IMConn)) (*net.IMConn, error) {
+func dial(scheme string, u *user.User, cb func(conn *net.IMConn)) (*net.IMConn, error) {
+	authHandler := Scheme(scheme)
 	conn, err := net.DialIMAndServe(server, &comet.AuthMsg{
 		AppId: appId,
 		Token: u.Token(),
 		Ext:   nil,
-	}, 20*time.Second, ws.Auth)
+	}, 20*time.Second, authHandler)
 	if err != nil {
 		return nil, err
 	}
