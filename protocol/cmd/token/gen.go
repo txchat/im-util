@@ -25,9 +25,10 @@ import (
 	"encoding/hex"
 	"time"
 
+	"github.com/txchat/im-util/pkg/wallet"
+
 	"github.com/spf13/cobra"
 	"github.com/txchat/dtalk/pkg/auth"
-	"github.com/txchat/im-util/protocol/wallet"
 )
 
 // genCmd represents the gen command
@@ -94,7 +95,7 @@ func genRunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	client := auth.NewDefaultApiAuthenticator()
+	client := auth.NewDefaultAPIAuthenticator()
 	token := client.Request(appKey, public, private)
 	cmd.Printf("token is: %s\n", token)
 	return nil

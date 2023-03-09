@@ -17,7 +17,7 @@ import (
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/golang/protobuf/proto"
 	"github.com/txchat/im-util/app-examples/echo/types"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 const (
@@ -53,13 +53,13 @@ func client(appId, token, server string) {
 	}
 	wr := bufio.NewWriter(conn)
 	rd := bufio.NewReader(conn)
-	authMsg := &comet.AuthMsg{
+	authMsg := &protocol.AuthBody{
 		AppId: appId,
 		Token: token,
 	}
-	p := new(comet.Proto)
+	p := new(protocol.Proto)
 	p.Ver = 1
-	p.Op = int32(comet.Op_Auth)
+	p.Op = int32(protocol.Op_Auth)
 	p.Seq = seq
 	p.Body, _ = proto.Marshal(authMsg)
 
@@ -78,10 +78,10 @@ func client(appId, token, server string) {
 
 	// writer heartbeat
 	go func() {
-		hb := new(comet.Proto)
+		hb := new(protocol.Proto)
 		for {
 			// heartbeat
-			hb.Op = int32(comet.Op_Heartbeat)
+			hb.Op = int32(protocol.Op_Heartbeat)
 			hb.Seq = GetSeq()
 			hb.Body = nil
 			if err = WriteProto(wr, hb); err != nil {
@@ -101,13 +101,13 @@ func client(appId, token, server string) {
 
 	// write ping
 	go func() {
-		pp := new(comet.Proto)
+		pp := new(protocol.Proto)
 		for {
-			pp.Op = int32(comet.Op_SendMsg)
+			pp.Op = int32(protocol.Op_Message)
 			pp.Seq = GetSeq()
 			msg := fmt.Sprintf("ping:%v", pp.Seq)
 			echo := &types.EchoMsg{
-				Value: &types.EchoMsg_Ping{&types.Ping{Msg: msg}},
+				Value: &types.EchoMsg_Ping{Ping: &types.Ping{Msg: msg}},
 				Ty:    int32(types.EchoOp_PingAction),
 			}
 			body, err := proto.Marshal(echo)
@@ -144,9 +144,9 @@ func client(appId, token, server string) {
 		xxx, _ := json.Marshal(p)
 		log.Printf("server resp p:[%v]", string(xxx))
 
-		if p.Op == int32(comet.Op_AuthReply) {
+		if p.Op == int32(protocol.Op_AuthReply) {
 			log.Printf("uid:%s auth success", uid)
-		} else if p.Op == int32(comet.Op_HeartbeatReply) {
+		} else if p.Op == int32(protocol.Op_HeartbeatReply) {
 			log.Printf("uid:%s recv heartbeat reply", uid)
 			if err = conn.SetReadDeadline(time.Now().Add(heart + 60*time.Second)); err != nil {
 				log.Printf("conn.SetReadDeadline() error(%v)", err)
@@ -169,7 +169,7 @@ func GetSeq() int32 {
 	return seq
 }
 
-func WriteProto(wr *bufio.Writer, p *comet.Proto) error {
+func WriteProto(wr *bufio.Writer, p *protocol.Proto) error {
 	lck.Lock()
 	defer lck.Unlock()
 

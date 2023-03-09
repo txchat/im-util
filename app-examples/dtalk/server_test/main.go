@@ -3,23 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-
-	"github.com/txchat/im-util/pkg/net/tcp"
 
 	"github.com/33cn/chain33/common/address"
 	"github.com/33cn/chain33/types"
 	"github.com/33cn/chain33/wallet/bipwallet"
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
-	protoutil "github.com/txchat/im-util/internal/proto"
-	"github.com/txchat/im-util/internal/user"
+	"github.com/txchat/dtalk/api/proto/auth"
+	"github.com/txchat/dtalk/api/proto/message"
+	"github.com/txchat/im-util/pkg/device"
 	"github.com/txchat/im-util/pkg/net"
-	"github.com/txchat/im-util/pkg/net/ws"
-	comet "github.com/txchat/im/api/comet/grpc"
-	xproto "github.com/txchat/imparse/proto"
+	"github.com/txchat/im-util/pkg/user"
 )
 
 var (
@@ -32,76 +30,29 @@ func init() {
 	log = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	flag.StringVar(&appId, "appId", "dtalk", "")
 	flag.StringVar(&server, "server", "127.0.0.1:3102", "")
-	flag.StringVar(&scheme, "scheme", "websocket", "")
+	flag.StringVar(&scheme, "scheme", "ws", "tcp/ws")
 }
 
 func main() {
 	flag.Parse()
-	seq := int32(0)
-	mid := int64(0)
-	closer := make(chan bool)
 	log.Info().Str("appId", appId).Str("server", server).Msg("start")
+	var sendAction device.ActionInfo
 
 	a, err := newUser()
 	if err != nil {
 		log.Error().Err(err).Msg("create user a failed")
 		os.Exit(1)
 	}
-	connA, err := dial(scheme, a, func(conn *net.IMConn) {
-		for {
-			select {
-			case <-closer:
-				return
-			default:
-				revProto := conn.Read()
-				// do ack
-				switch comet.Op(revProto.GetOp()) {
-				case comet.Op_ReceiveMsg:
-					bizProto, err := protoutil.ConvertBizProto(revProto.GetBody())
-					if err != nil {
-						log.Error().Err(err).Msg("ConvertBizProto Op_ReceiveMsg")
-						continue
-					}
-					if bizProto.GetEventType() == xproto.Proto_common {
-						common, err := protoutil.ConvertCommon(bizProto.GetBody())
-						if err == nil && common.GetFrom() != a.GetUID() {
-							//// 记录服务端Push的日志
-							//log.Info().Str("action", "receive").
-							//	Str("user_id", a.GetId()).
-							//	Str("conn_id", a.GetConnId()).
-							//	Int64("mid", common.GetMid()).
-							//	Str("from", common.GetFrom()).
-							//	Str("target", common.GetTarget()).
-							//	Msg("")
-						}
-					}
-					p, err := protoutil.CreateProtoAck(0, revProto.GetSeq())
-					if err != nil {
-						log.Error().Err(err).Msg("CreateProtoAck Op_ReceiveMsg")
-						continue
-					}
-					_, err = conn.Push(p)
-					if err != nil {
-						log.Error().Err(err).Msg("Send Op_ReceiveMsg")
-						continue
-					}
-				case comet.Op_SendMsgReply:
-					commAck, err := protoutil.ConvertCommonAck(revProto.GetBody())
-					if err != nil {
-						log.Error().Err(err).Msg("ConvertCommonAck Op_SendMsgReply")
-						continue
-					}
-					// 记录服务端Ack的日志
-					if seq == revProto.GetAck() {
-						mid = commAck.GetMid()
-						log.Info().Msg("接收发送响应成功，步骤2达成")
-					}
-				}
-			}
-		}
+
+	devA, err := dial(fmt.Sprintf("%v://%v", scheme, server), a, func(c *net.IMConn, action device.ActionInfo) error {
+		log.Info().Msg("发送成功，步骤1达成")
+		sendAction = action
+		return nil
+	}, func(c *net.IMConn, action device.ActionInfo) error {
+		return nil
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("user a conn server failed")
+		log.Error().Err(err).Msg("create device a failed")
 		os.Exit(1)
 	}
 
@@ -110,60 +61,27 @@ func main() {
 		log.Error().Err(err).Msg("create user b failed")
 		os.Exit(1)
 	}
-	_, err = dial(scheme, b, func(conn *net.IMConn) {
-		for {
-			select {
-			case <-closer:
-				return
-			default:
-				// 接收时间点的日志
-				revProto := conn.Read()
-				// do ack
-				switch comet.Op(revProto.GetOp()) {
-				case comet.Op_ReceiveMsg:
-					bizProto, err := protoutil.ConvertBizProto(revProto.GetBody())
-					if err != nil {
-						log.Error().Err(err).Msg("ConvertBizProto Op_ReceiveMsg")
-						continue
-					}
-					if bizProto.GetEventType() == xproto.Proto_common {
-						common, err := protoutil.ConvertCommon(bizProto.GetBody())
-						if err == nil && common.GetFrom() != b.GetUID() {
-							if mid == common.GetMid() {
-								// 记录服务端Push的日志
-								log.Info().Msg("对端接收成功，步骤3达成")
-							}
-						}
-					}
-					p, err := protoutil.CreateProtoAck(0, revProto.GetSeq())
-					if err != nil {
-						log.Error().Err(err).Msg("CreateProtoAck Op_ReceiveMsg")
-						continue
-					}
-					_, err = conn.Push(p)
-					if err != nil {
-						log.Error().Err(err).Msg("Send Op_ReceiveMsg")
-						continue
-					}
-				case comet.Op_SendMsgReply:
-				}
-			}
+
+	devB, err := dial(fmt.Sprintf("%v://%v", scheme, server), b, func(c *net.IMConn, action device.ActionInfo) error {
+		return nil
+	}, func(c *net.IMConn, action device.ActionInfo) error {
+		if isFetch(sendAction, action) {
+			log.Info().Msg("对端接收成功，步骤2达成")
 		}
+		return nil
 	})
 	if err != nil {
-		log.Error().Err(err).Msg("user b conn server failed")
+		log.Error().Err(err).Msg("create device b failed")
 		os.Exit(1)
 	}
 
 	log.Info().Msg(`
-	待确认3个步骤：
+	待确认2个步骤：
 步骤1：a成功发送消息
-步骤2：a接收发送响应
-步骤3：b接收到a发送的数据
+步骤2：b接收到a发送的数据
 `)
 
-	seq, err = SendMsg(connA, xproto.Channel_name[int32(xproto.Channel_ToUser)], a.GetUID(), b.GetUID(), "1")
-	// create proto
+	err = devB.SendTextMsg(message.Channel_Private, a.GetUID(), "hello")
 	if err != nil {
 		log.Error().Err(err).Msg("user a send proto failed")
 		os.Exit(1)
@@ -176,22 +94,14 @@ func main() {
 		s := <-c
 		switch s {
 		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
-			close(closer)
+			devA.TurnOff()
+			devB.TurnOff()
 			return
 		case syscall.SIGHUP:
 			// TODO reload
 		default:
 			return
 		}
-	}
-}
-
-func Scheme(scheme string) net.AuthHandler {
-	switch scheme {
-	case "tcp":
-		return tcp.Auth
-	default:
-		return ws.Auth
 	}
 }
 
@@ -214,37 +124,24 @@ func newUser() (*user.User, error) {
 	return user.NewUser(addr, private, public), nil
 }
 
-func dial(scheme string, u *user.User, cb func(conn *net.IMConn)) (*net.IMConn, error) {
-	authHandler := Scheme(scheme)
-	conn, err := net.DialIMAndServe(server, &comet.AuthMsg{
-		AppId: appId,
-		Token: u.Token(),
-		Ext:   nil,
-	}, 20*time.Second, authHandler)
+func dial(rawURL string, u *user.User, sendCB device.OnSendHandler, revCB device.OnReceiveHandler) (*device.Device, error) {
+	URL, err := url.Parse(rawURL)
 	if err != nil {
 		return nil, err
 	}
-	go cb(conn)
-	return conn, nil
+	dev := device.NewDevice(uuid.NewString(), "test_server_a", auth.Device_Android, u)
+	err = dev.DialIMServer(appId, *URL, nil)
+	if err != nil {
+		return nil, err
+	}
+	dev.SetOnSend(sendCB)
+	dev.SetOnReceive(revCB)
+	return dev, dev.TurnOn()
 }
 
-func SendMsg(conn *net.IMConn, channelType string, from, target, text string) (int32, error) {
-	//do send
-	chType, ok := xproto.Channel_value[channelType]
-	if !ok {
-		return 0, fmt.Errorf("undefined channel type %v", chType)
+func isFetch(sendAction, revAction device.ActionInfo) bool {
+	if sendAction.Mid == revAction.Mid && sendAction.ChannelType == revAction.ChannelType && sendAction.Target == revAction.Target {
+		return true
 	}
-	p, err := protoutil.CreateProtoSendMsg(0, from, target, xproto.Channel(chType), text)
-	if err != nil {
-		log.Error().Err(err).Msg("CreateProtoSendMsg RangeSend")
-		return 0, err
-	}
-
-	seq, err := conn.Push(p)
-	if err != nil {
-		log.Error().Err(err).Msg("Send RangeSend")
-		return 0, err
-	}
-	log.Info().Msg("发送成功，步骤1达成")
-	return seq, nil
+	return false
 }

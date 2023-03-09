@@ -28,7 +28,7 @@ import (
 
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/spf13/cobra"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 // checkCmd represents the check command
@@ -67,7 +67,7 @@ func checkRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	var p comet.Proto
+	var p protocol.Proto
 	err = p.ReadTCP(bufio.NewReader(bytes.NewReader(data)))
 	if err != nil {
 		return err

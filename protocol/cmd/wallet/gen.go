@@ -25,8 +25,9 @@ import (
 	"fmt"
 	"runtime"
 
+	wallet2 "github.com/txchat/im-util/pkg/wallet"
+
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/protocol/wallet"
 )
 
 // genCmd represents the gen command
@@ -77,11 +78,10 @@ func init() {
 }
 
 func genWallet(cmd *cobra.Command, args []string) {
-	var users []*wallet.Wallet
+	var users []*wallet2.Wallet
 	//读取用户
 	if readDir != "" {
-		readDriver := wallet.NewFSDriver(readDir, readSplit)
-		metadata, err := readDriver.Load()
+		metadata, err := wallet2.LoadMetadata(readDir, readSplit)
 		if err != nil {
 			cmd.PrintErrf("can not load from storage: %v\n", err)
 			return
@@ -89,7 +89,7 @@ func genWallet(cmd *cobra.Command, args []string) {
 		fmt.Printf("load users:%d\r\n", len(metadata))
 
 		//从文件生成
-		fa := wallet.NewFactory(wallet.NewMnemonicCreator(metadata))
+		fa := wallet2.NewFactory(wallet2.NewMnemonicCreator(metadata))
 		err = fa.Create(runtime.NumCPU())
 		if err != nil {
 			cmd.PrintErrf("can not create wallet: %v\n", err)
@@ -100,7 +100,7 @@ func genWallet(cmd *cobra.Command, args []string) {
 
 	//生成新用户
 	if newNum > uint32(len(users)) {
-		fa := wallet.NewFactory(wallet.NewProduceCreator(int(newNum) - len(users)))
+		fa := wallet2.NewFactory(wallet2.NewProduceCreator(int(newNum) - len(users)))
 		err := fa.Create(runtime.NumCPU())
 		if err != nil {
 			cmd.PrintErrf("can not create wallet: %v\n", err)
@@ -109,9 +109,9 @@ func genWallet(cmd *cobra.Command, args []string) {
 		users = append(users, fa.GetRet()...)
 	}
 
-	metadata := make([]*wallet.Metadata, len(users))
+	metadata := make([]*wallet2.Metadata, len(users))
 	for i, user := range users {
-		md, err := wallet.FormatMetadataFromWallet(addrType, user)
+		md, err := wallet2.FormatMetadataFromWallet(addrType, user)
 		if err != nil {
 			cmd.PrintErrf("wallet to metadata failed: %v\n", err)
 			return
@@ -121,13 +121,14 @@ func genWallet(cmd *cobra.Command, args []string) {
 
 	//打印
 	if display {
-		p := wallet.NewPrinter(metadata)
+		p := wallet2.NewPrinter(metadata)
 		p.Print()
 	}
 
 	//存储用户
 	if writeDir != "" {
-		saveDriver := wallet.NewFSDriver(writeDir, writeSplit)
+		formatter := wallet2.NewSplitFormatter(writeSplit)
+		saveDriver := wallet2.NewFSDriver(writeDir, formatter)
 		err := saveDriver.Save(metadata)
 		if err != nil {
 			cmd.PrintErrf("can not save to storage: %v\n", err)

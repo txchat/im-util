@@ -11,7 +11,7 @@ import (
 	//secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
 	secp256k1_haltingstate "github.com/txchat/dtalk/pkg/crypt/secp256k1-haltingstate"
 	"github.com/txchat/im-util/protocol/frame"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 var driver xcrypt.Encrypt
@@ -28,9 +28,9 @@ type authChecker struct {
 	isCkTimeOut bool
 }
 
-func (t *authChecker) Check(p *comet.Proto) (err error) {
+func (t *authChecker) Check(p *protocol.Proto) (err error) {
 	var (
-		authFrame comet.AuthMsg
+		authFrame protocol.AuthBody
 	)
 	err = proto.Unmarshal(p.Body, &authFrame)
 	if err != nil {
@@ -47,7 +47,7 @@ func (t *authChecker) Check(p *comet.Proto) (err error) {
 		return
 	}
 
-	apiRequest, err := auth.NewApiRequestFromToken(authFrame.Token)
+	apiRequest, err := auth.NewAPIRequestFromToken(authFrame.Token)
 	if err != nil {
 		return err
 	}
@@ -56,14 +56,14 @@ func (t *authChecker) Check(p *comet.Proto) (err error) {
 		return err
 	}
 	if isMatch, err := signatory.Match(apiRequest.GetSignature(), apiRequest.GetPublicKey()); !isMatch {
-		return auth.ERR_SIGNATUREINVALID(err)
+		return auth.ErrSignatureInvalid(err)
 	}
 	if t.isCkTimeOut && signatory.IsExpire() {
-		return auth.ERR_SIGNATUREEXPIRED
+		return auth.ErrSignatureExpired
 	}
 	uid := address.PublicKeyToAddress(address.NormalVer, apiRequest.GetPublicKey())
 	if uid == "" {
-		return auth.ERR_UIDINVALID
+		return auth.ErrUIDInvalid
 	}
 	return
 }

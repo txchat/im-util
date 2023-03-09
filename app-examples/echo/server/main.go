@@ -2,21 +2,24 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
-	cluster "github.com/bsm/sarama-cluster"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/proto"
+	xkafka "github.com/oofpgDLD/kafka-go"
 	"github.com/txchat/im-util/app-examples/echo/types"
-	comet "github.com/txchat/im/api/comet/grpc"
-	logic "github.com/txchat/im/api/logic/grpc"
-	"github.com/txchat/im/common"
+	"github.com/txchat/im/api/protocol"
+	"github.com/txchat/im/app/logic/logicclient"
+	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/zrpc"
 )
 
 var (
@@ -27,8 +30,8 @@ var (
 )
 
 type Job struct {
-	consumer    *cluster.Consumer
-	logicClient logic.LogicClient
+	batchConsumer *xkafka.BatchConsumer
+	logicClient   logicclient.Logic
 }
 
 func init() {
@@ -41,114 +44,83 @@ func init() {
 // New new a push job.
 func New() *Job {
 	j := &Job{
-		consumer:    newKafkaSub(),
-		logicClient: newLogicClient(logicAddr),
+		logicClient: logicclient.NewLogic(zrpc.MustNewClient(zrpc.RpcClientConf{
+			Endpoints: []string{logicAddr},
+			Timeout:   2000,
+		}, zrpc.WithNonBlock())),
 	}
 
+	//new batch consumer
+	consumer := xkafka.NewConsumer(xkafka.ConsumerConfig{
+		Version:        "",
+		Brokers:        []string{mqAddr},
+		Group:          fmt.Sprintf("goim-%s-receive", appId),
+		Topic:          fmt.Sprintf("goim-%s-receive-echo", appId),
+		CacheCapacity:  100,
+		ConnectTimeout: 100,
+	}, nil)
+	logx.Info("dial kafka broker success")
+	bc := xkafka.NewBatchConsumer(xkafka.BatchConsumerConf{
+		CacheCapacity: 100,
+		Consumers:     100,
+		Processors:    100,
+	}, xkafka.WithHandle(j.process), consumer)
+	j.batchConsumer = bc
 	return j
 }
 
-func newKafkaSub() *cluster.Consumer {
-	config := cluster.NewConfig()
-	config.Consumer.Return.Errors = true
-	config.Group.Return.Notifications = true
-
-	topic := fmt.Sprintf("goim-%s-topic", appId)
-	group := fmt.Sprintf("goim-%s-group", appId)
-	consumer, err := cluster.NewConsumer([]string{mqAddr}, group, []string{topic}, config)
-	if err != nil {
-		panic(err)
+func (j *Job) process(key string, data []byte) error {
+	ctx := context.Background()
+	receivedMsg := new(logicclient.ReceivedMessage)
+	if err := proto.Unmarshal(data, receivedMsg); err != nil {
+		return err
 	}
-	return consumer
-}
-
-func newLogicClient(addr string) logic.LogicClient {
-	conn, err := common.NewGRPCConn(addr, time.Second)
-	if err != nil {
-		panic(err)
-	}
-	return logic.NewLogicClient(conn)
-}
-
-// Consume messages, watch signals
-func (j *Job) Consume() {
-	for {
-		select {
-		case err := <-j.consumer.Errors():
-			log.Printf("consumer error(%v)", err)
-		case n := <-j.consumer.Notifications():
-			log.Printf("consumer rebalanced(%v)", n)
-		case msg, ok := <-j.consumer.Messages():
-			if !ok {
-				return
-			}
-			j.consumer.MarkOffset(msg, "")
-			bizMsg := new(logic.BizMsg)
-			if err := proto.Unmarshal(msg.Value, bizMsg); err != nil {
-				log.Printf("proto.Unmarshal(%v) error(%v)", msg, err)
-				continue
-			}
-			//log.Printf("consume: %s/%d/%d\t%s\t%+v", msg.Topic, msg.Partition, msg.Offset, msg.Key, bizMsg)
-			j.processMsg(bizMsg)
-		}
-	}
-}
-
-func (j *Job) processMsg(m *logic.BizMsg) {
-	if m.AppId != appId {
-		return
+	if receivedMsg.GetAppId() != appId {
+		log.Printf("unsupported appID")
+		return fmt.Errorf("unsupported appID")
 	}
 
-	var p comet.Proto
-	err := proto.Unmarshal(m.Msg, &p)
-	if err != nil {
-		log.Printf("unmarshal proto error %v", err)
-		return
-	}
-
-	if m.Op == int32(comet.Op_Auth) {
-		log.Printf("user %v login  with key %s", m.FromId, m.Key)
-	} else if m.Op == int32(comet.Op_Disconnect) {
-		log.Printf("user %v logout with key %s", m.FromId, m.Key)
-	} else {
-		xxx, _ := json.Marshal(p)
-		log.Printf("recv Proto:[%v]", string(xxx))
-
+	switch receivedMsg.GetOp() {
+	case protocol.Op_Message:
 		var echo types.EchoMsg
-		err = proto.Unmarshal(p.Body, &echo)
+		err := proto.Unmarshal(receivedMsg.GetBody(), &echo)
 		if err != nil {
-			log.Printf("unmarshal echo error(%v) ", err)
-			return
+			log.Printf("echoMsg unmarshal error(%v) ", err)
+			return err
 		}
-		xxx, _ = json.Marshal(echo)
-		log.Printf("client echo:[%v]", string(xxx))
 
-		p.Body, err = makeResp(&echo)
+		receivedMsg.Body, err = makeResp(&echo)
 		if err != nil {
 			log.Printf("makeResp error(%v) ", err)
-			return
+			return err
 		}
 
-		xxx, _ = json.Marshal(p)
-		log.Printf("resp Proto:[%v]", string(xxx))
-		bytes, _ := proto.Marshal(&p)
-		keysMsg := &logic.KeysMsg{
-			AppId:  appId,
-			ToKeys: []string{m.Key},
-			Msg:    bytes,
-		}
-
-		_, err = j.logicClient.PushByKeys(context.Background(), keysMsg)
+		bytes, err := proto.Marshal(receivedMsg)
 		if err != nil {
-			log.Printf("PushByKeys %s, %s, (%v) ", m.FromId, m.Key, err)
+			log.Printf("receivedMsg marshal error(%v) ", err)
+			return err
 		}
+
+		_, err = j.logicClient.PushByKey(ctx, &logicclient.PushByKeyReq{
+			AppId: appId,
+			ToKey: []string{receivedMsg.Key},
+			Op:    receivedMsg.GetOp(),
+			Body:  bytes,
+		})
+		if err != nil {
+			log.Printf("echo logic push error(%v) ", err)
+			return err
+		}
+	default:
+		return fmt.Errorf("received message operation %v unsupported", receivedMsg.GetOp())
 	}
+	return nil
 }
 
 func makeResp(e *types.EchoMsg) ([]byte, error) {
 	var ee types.EchoMsg
-	ee.Ty = int32(types.EchoOp_PangAction)
-	ee.Value = &types.EchoMsg_Pang{&types.Pang{Msg: fmt.Sprintf("pang for %s", e.Value.(*types.EchoMsg_Ping).Ping.Msg)}}
+	ee.Ty = int32(types.EchoOp_PongAction)
+	ee.Value = &types.EchoMsg_Pong{Pong: &types.Pong{Msg: fmt.Sprintf("pong for %s", e.Value.(*types.EchoMsg_Ping).Ping.Msg)}}
 	return proto.Marshal(&ee)
 }
 
@@ -160,9 +132,24 @@ func main() {
 	go e.Run(listenAddr)
 
 	j := New()
-	go j.Consume()
 
-	select {}
+	// init signal
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, syscall.SIGHUP, syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT)
+	for {
+		s := <-c
+		switch s {
+		case syscall.SIGQUIT, syscall.SIGTERM, syscall.SIGINT:
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+			j.batchConsumer.GracefulStop(ctx)
+			cancel()
+			return
+		case syscall.SIGHUP:
+			// TODO reload
+		default:
+			return
+		}
+	}
 }
 
 func login(c *gin.Context) {
