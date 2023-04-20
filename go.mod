@@ -11,7 +11,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
-	github.com/oofpgDLD/kafka-go v1.0.0
+	github.com/oofpgDLD/kafka-go v1.1.0
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.2
@@ -19,7 +19,7 @@ require (
 	github.com/txchat/im v0.0.1
 	github.com/yusufpapurcu/wmi v1.2.2 // indirect
 	github.com/zeromicro/go-zero v1.4.3
-	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
+	golang.org/x/crypto v0.0.0-20221005025214-4161e89ecf1b
 	google.golang.org/protobuf v1.28.1
 )
 

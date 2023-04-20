@@ -64,13 +64,12 @@ func New() *Job {
 		CacheCapacity: 100,
 		Consumers:     100,
 		Processors:    100,
-	}, xkafka.WithHandle(j.process), consumer)
+	}, consumer, xkafka.WithHandle(j.process))
 	j.batchConsumer = bc
 	return j
 }
 
-func (j *Job) process(key string, data []byte) error {
-	ctx := context.Background()
+func (j *Job) process(ctx context.Context, key string, data []byte) error {
 	receivedMsg := new(logicclient.ReceivedMessage)
 	if err := proto.Unmarshal(data, receivedMsg); err != nil {
 		return err

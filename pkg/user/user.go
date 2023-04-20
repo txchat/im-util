@@ -5,7 +5,9 @@ import (
 
 	"github.com/txchat/dtalk/pkg/auth"
 	xcrypt "github.com/txchat/dtalk/pkg/crypt"
-	secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
+
+	//secp256k1_ethereum "github.com/txchat/dtalk/pkg/crypt/secp256k1-ethereum"
+	secp256k1_haltingstate "github.com/txchat/dtalk/pkg/crypt/secp256k1-haltingstate"
 )
 
 var (
@@ -14,7 +16,7 @@ var (
 
 func init() {
 	var err error
-	driver, err = xcrypt.Load(secp256k1_ethereum.Name)
+	driver, err = xcrypt.Load(secp256k1_haltingstate.Name)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +41,7 @@ func (u *User) genToken() string {
 func (u *User) Token() string {
 	if time.Now().After(u.tokenExpire.Add(TokenTimeout)) {
 		u.tokenExpire = time.Now()
-		return u.genToken()
+		u.token = u.genToken()
 	}
 	return u.token
 }

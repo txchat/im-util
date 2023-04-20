@@ -13,7 +13,7 @@ func TestDialIMAndServe(t *testing.T) {
 		AppId: "mock",
 		Token: "TestDialIMAndServe",
 		Ext:   nil,
-	}, time.Second, mockAuth)
+	}, time.Second, NewMockAuth)
 	assert.Nil(t, err)
 	defer conn.Close()
 	p := conn.Read()

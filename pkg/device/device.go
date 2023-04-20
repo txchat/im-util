@@ -1,10 +1,14 @@
 package device
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/url"
 	"sync/atomic"
 	"time"
+
+	"github.com/rs/zerolog/log"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
@@ -13,13 +17,19 @@ import (
 	"github.com/txchat/dtalk/api/proto/message"
 	protoutil "github.com/txchat/im-util/internal/proto"
 	"github.com/txchat/im-util/pkg/net"
+	xhttp "github.com/txchat/im-util/pkg/net/http"
 	"github.com/txchat/im-util/pkg/net/tcp"
 	"github.com/txchat/im-util/pkg/net/ws"
 	"github.com/txchat/im-util/pkg/user"
 	"github.com/txchat/im/api/protocol"
 )
 
+const (
+	Version0dot2dot0 = "v0.2.0"
+)
+
 type ActionInfo struct {
+	Err         error           `json:"err"`
 	Action      string          `json:"action"`
 	UID         string          `json:"uid"`
 	ConnID      string          `json:"conn_id"`
@@ -45,6 +55,8 @@ type Device struct {
 	isShutdown       int32
 	onReceive        OnReceiveHandler
 	onSend           OnSendHandler
+
+	httpClient *xhttp.ChatHTTPAPIClient
 }
 
 func NewDevice(uuid, deviceName string, deviceType auth.Device, u *user.User) *Device {
@@ -88,6 +100,18 @@ func (d *Device) GetUser() *user.User {
 	return d.u
 }
 
+func (d *Device) DialChatAPI(url url.URL, timeout time.Duration) {
+	d.httpClient = xhttp.NewChatHTTPAPIClient(url.String(), timeout, func() *xhttp.AuthenticationMetadata {
+		return &xhttp.AuthenticationMetadata{
+			Signature:  d.u.Token(),
+			UUID:       d.uuid,
+			Device:     d.deviceType.String(),
+			DeviceName: d.deviceName,
+			Version:    Version0dot2dot0,
+		}
+	})
+}
+
 func (d *Device) DialIMServer(appId string, url url.URL, ext []byte) error {
 	var authHandler net.AuthHandler
 	switch url.Scheme {
@@ -102,7 +126,7 @@ func (d *Device) DialIMServer(appId string, url url.URL, ext []byte) error {
 		AppId: appId,
 		Token: d.u.Token(),
 		Ext:   ext,
-	}, 20*time.Second, authHandler)
+	}, 7*time.Second, authHandler)
 	if err != nil {
 		return err
 	}
@@ -125,6 +149,18 @@ func (d *Device) WithDeviceInfo() []byte {
 	return extData
 }
 
+func (d *Device) sendMsg(data []byte) (string, error) {
+	if d.httpClient == nil {
+		return "", errors.New("unset http client")
+	}
+	resp, err := d.httpClient.SendChatMessage(context.Background(), data)
+	if err != nil {
+		return "", err
+	}
+	log.Info().Err(err).Interface("resp", *resp).Msg("sendMsg")
+	return xhttp.GetMid(resp)
+}
+
 func (d *Device) SendTextMsg(channelType message.Channel, target, text string) error {
 	msgType, contentData, err := protoutil.Text(text)
 	if err != nil {
@@ -144,13 +180,14 @@ func (d *Device) SendTextMsg(channelType message.Channel, target, text string) e
 	}
 
 	//发送消息
-	mid, err := d.conn.SendMsg(&msg)
+	data, err := proto.Marshal(&msg)
 	if err != nil {
 		return err
 	}
-
+	mid, err := d.sendMsg(data)
 	if d.onSend != nil {
 		err = d.onSend(d.conn, ActionInfo{
+			Err:         err,
 			Action:      "send",
 			UID:         d.u.GetUID(),
 			ConnID:      d.conn.GetConnId(),
@@ -166,7 +203,7 @@ func (d *Device) SendTextMsg(channelType message.Channel, target, text string) e
 			return err
 		}
 	}
-	return nil
+	return err
 }
 
 func (d *Device) serve() {
@@ -198,7 +235,7 @@ func (d *Device) serve() {
 								UID:         d.u.GetUID(),
 								ConnID:      d.conn.GetConnId(),
 								UUID:        d.uuid,
-								From:        d.u.GetUID(),
+								From:        msg.GetFrom(),
 								Target:      msg.GetTarget(),
 								ChannelType: msg.GetChannelType(),
 								Seq:         revProto.GetSeq(),

@@ -2,11 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/33cn/chain33/common/address"
 	"github.com/33cn/chain33/types"
@@ -21,21 +21,21 @@ import (
 )
 
 var (
-	log           zerolog.Logger
-	appId, server string
-	scheme        string
+	log               zerolog.Logger
+	appId             string
+	cometAPI, chatAPI string
 )
 
 func init() {
 	log = zerolog.New(os.Stdout).With().Timestamp().Logger()
 	flag.StringVar(&appId, "appId", "dtalk", "")
-	flag.StringVar(&server, "server", "127.0.0.1:3102", "")
-	flag.StringVar(&scheme, "scheme", "ws", "tcp/ws")
+	flag.StringVar(&cometAPI, "comet", "ws://127.0.0.1:3102", "ws://<IP>:<port> or tcp://<IP>:<port>")
+	flag.StringVar(&chatAPI, "chat", "http://127.0.0.1:8888", "http://<IP>:<port> or https://<IP>:<port>")
 }
 
 func main() {
 	flag.Parse()
-	log.Info().Str("appId", appId).Str("server", server).Msg("start")
+	log.Info().Str("appId", appId).Str("cometAPI", cometAPI).Str("chatAPI", chatAPI).Msg("start")
 	var sendAction device.ActionInfo
 
 	a, err := newUser()
@@ -44,17 +44,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	devA, err := dial(fmt.Sprintf("%v://%v", scheme, server), a, func(c *net.IMConn, action device.ActionInfo) error {
-		log.Info().Msg("发送成功，步骤1达成")
+	devA, err := dial(chatAPI, cometAPI, a, func(c *net.IMConn, action device.ActionInfo) error {
+		if action.Err != nil {
+			log.Error().Err(action.Err).Msg("步骤1发送失败")
+			return err
+		}
 		sendAction = action
+		log.Info().Str("mid", action.Mid).Msg("发送成功，步骤1达成")
 		return nil
-	}, func(c *net.IMConn, action device.ActionInfo) error {
-		return nil
-	})
+	}, nil)
 	if err != nil {
 		log.Error().Err(err).Msg("create device a failed")
 		os.Exit(1)
 	}
+	log.Info().Str("uid", a.GetUID()).Msg("user a init")
 
 	b, err := newUser()
 	if err != nil {
@@ -62,9 +65,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	devB, err := dial(fmt.Sprintf("%v://%v", scheme, server), b, func(c *net.IMConn, action device.ActionInfo) error {
-		return nil
-	}, func(c *net.IMConn, action device.ActionInfo) error {
+	devB, err := dial(chatAPI, cometAPI, b, nil, func(c *net.IMConn, action device.ActionInfo) error {
 		if isFetch(sendAction, action) {
 			log.Info().Msg("对端接收成功，步骤2达成")
 		}
@@ -74,6 +75,7 @@ func main() {
 		log.Error().Err(err).Msg("create device b failed")
 		os.Exit(1)
 	}
+	log.Info().Str("uid", b.GetUID()).Msg("user b init")
 
 	log.Info().Msg(`
 	待确认2个步骤：
@@ -81,7 +83,7 @@ func main() {
 步骤2：b接收到a发送的数据
 `)
 
-	err = devB.SendTextMsg(message.Channel_Private, a.GetUID(), "hello")
+	err = devA.SendTextMsg(message.Channel_Private, b.GetUID(), "hello")
 	if err != nil {
 		log.Error().Err(err).Msg("user a send proto failed")
 		os.Exit(1)
@@ -124,22 +126,28 @@ func newUser() (*user.User, error) {
 	return user.NewUser(addr, private, public), nil
 }
 
-func dial(rawURL string, u *user.User, sendCB device.OnSendHandler, revCB device.OnReceiveHandler) (*device.Device, error) {
-	URL, err := url.Parse(rawURL)
+func dial(chatURLStr, cometURLStr string, u *user.User, sendCB device.OnSendHandler, revCB device.OnReceiveHandler) (*device.Device, error) {
+	cometURL, err := url.Parse(cometURLStr)
+	if err != nil {
+		return nil, err
+	}
+	chatURL, err := url.Parse(chatURLStr)
 	if err != nil {
 		return nil, err
 	}
 	dev := device.NewDevice(uuid.NewString(), "test_server_a", auth.Device_Android, u)
-	err = dev.DialIMServer(appId, *URL, nil)
+	err = dev.DialIMServer(appId, *cometURL, nil)
 	if err != nil {
 		return nil, err
 	}
+	dev.DialChatAPI(*chatURL, time.Second*5)
 	dev.SetOnSend(sendCB)
 	dev.SetOnReceive(revCB)
 	return dev, dev.TurnOn()
 }
 
 func isFetch(sendAction, revAction device.ActionInfo) bool {
+	log.Debug().Interface("sendAction", sendAction).Interface("revAction", revAction).Msg("do isFetch")
 	if sendAction.Mid == revAction.Mid && sendAction.ChannelType == revAction.ChannelType && sendAction.Target == revAction.Target {
 		return true
 	}

@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/txchat/dtalk/api/proto/message"
 	"github.com/txchat/im/api/protocol"
 )
 
@@ -20,9 +19,10 @@ type ReaderWriterCloser interface {
 type AuthHandler func(server string, msg *protocol.AuthBody) (ReaderWriterCloser, error)
 
 type IMConn struct {
-	heartbeat time.Duration
-	connId    string
-	seq       int32
+	heartTimer *time.Timer
+	heartbeat  time.Duration
+	connId     string
+	seq        int32
 	// 发送数据缓存通道
 	wb      chan *protocol.Proto
 	rb      chan *protocol.Proto
@@ -35,11 +35,6 @@ type IMConn struct {
 // Signal send wb to the channel, protocol ready.
 func (c *IMConn) Signal() {
 	c.wb <- protocol.ProtoReady
-}
-
-func (c *IMConn) SendMsg(msg *message.Message) (string, error) {
-	//TODO send msg
-	return "", nil
 }
 
 // Push server push message.
@@ -70,6 +65,7 @@ func (c *IMConn) Read() *protocol.Proto {
 // Close the channel.
 func (c *IMConn) Close() {
 	if atomic.CompareAndSwapInt32(&c.isClose, 0, 1) {
+		c.heartTimer.Stop()
 		c.err = c.conn.Close()
 		close(c.closer)
 	}
@@ -85,8 +81,20 @@ func (c *IMConn) GetConnId() string {
 
 // dispatch 处理发送操作
 func (c *IMConn) dispatch() {
+	hbProto := new(protocol.Proto)
 	for {
 		select {
+		case <-c.heartTimer.C:
+			// heartbeat
+			hbProto.Op = int32(protocol.Op_Heartbeat)
+			hbProto.Seq = c.incSeq()
+			hbProto.Body = nil
+
+			err := c.conn.WriteProto(hbProto)
+			if err != nil {
+				c.err = fmt.Errorf("heartbeat WriteProto: %v", err)
+				c.Close()
+			}
 		case <-c.closer:
 			return
 		case p := <-c.wb:
@@ -139,35 +147,14 @@ func DialIM(server string, authMsg *protocol.AuthBody, hb time.Duration, auth Au
 		return nil, err
 	}
 	cli := &IMConn{
-		connId:    uuid.New().String(),
-		heartbeat: hb,
-		wb:        make(chan *protocol.Proto, 100),
-		rb:        make(chan *protocol.Proto, 100),
-		closer:    make(chan bool, 1),
-		conn:      conn,
+		connId:     uuid.New().String(),
+		heartTimer: time.NewTimer(hb),
+		heartbeat:  hb,
+		wb:         make(chan *protocol.Proto, 100),
+		rb:         make(chan *protocol.Proto, 100),
+		closer:     make(chan bool, 1),
+		conn:       conn,
 	}
-
-	// 定期发送心跳
-	go func() {
-		hbProto := new(protocol.Proto)
-		for {
-			// heartbeat
-			hbProto.Op = int32(protocol.Op_Heartbeat)
-			hbProto.Seq = cli.incSeq()
-			hbProto.Body = nil
-			if _, err := cli.Push(hbProto); err != nil {
-				cli.err = err
-				return
-			}
-			//TODO 可以使用二叉堆计时器来优化
-			time.Sleep(cli.heartbeat)
-			select {
-			case <-cli.closer:
-				return
-			default:
-			}
-		}
-	}()
 	return cli, nil
 }
 

@@ -9,8 +9,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+	"github.com/txchat/dtalk/api/proto/auth"
 	xlog "github.com/txchat/im-util/internal/log"
 	"github.com/txchat/im-util/internal/rate"
 	"github.com/txchat/im-util/pkg/device"
@@ -105,7 +107,7 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 	lp := NewLogPrinter(outLog)
 	var devices []*device.Device
 	for _, u := range users {
-		d := device.NewDevice("", "", 0, u)
+		d := device.NewDevice(uuid.NewString(), "pressure-test", auth.Device_Android, u)
 		err = d.DialIMServer(appID, *URL, nil)
 		if err != nil {
 			log.Error().Err(err).Msg("DialIMServer failed")
@@ -177,24 +179,29 @@ func (lp *LogPrinter) onSendLogs(c *net.IMConn, action device.ActionInfo) error 
 	lp.log.Info().Str("action", action.Action).
 		Str("user_id", action.UID).
 		Str("conn_id", action.ConnID).
-		Int32("seq", action.Seq).
 		Str("uuid", action.UUID).
 		Str("from", action.From).
 		Str("target", action.Target).
 		Str("channel_type", action.ChannelType.String()).
+		Int32("seq", action.Seq).
+		Int32("ack", action.Ack).
+		Str("mid", action.Mid).
 		Msg("")
 	return nil
 }
 
 func (lp *LogPrinter) onReceiveLogs(c *net.IMConn, action device.ActionInfo) error {
-	// 发出时间点的日志
+	// 接收时间点的日志
 	lp.log.Info().Str("action", action.Action).
 		Str("user_id", action.UID).
 		Str("conn_id", action.ConnID).
-		Str("mid", action.Mid).
 		Str("uuid", action.UUID).
 		Str("from", action.From).
 		Str("target", action.Target).
+		Str("channel_type", action.ChannelType.String()).
+		Int32("seq", action.Seq).
+		Int32("ack", action.Ack).
+		Str("mid", action.Mid).
 		Msg("")
 	return nil
 }

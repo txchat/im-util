@@ -16,7 +16,7 @@ type mock struct {
 	closer  chan struct{}
 }
 
-func mockAuth(server string, authMsg *protocol.AuthBody) (ReaderWriterCloser, error) {
+func NewMockAuth(server string, authMsg *protocol.AuthBody) (ReaderWriterCloser, error) {
 	w := io.MultiWriter(os.Stdout)
 	log := zerolog.New(w).With().Str("server", server).Str("appId", authMsg.GetAppId()).Str("token", authMsg.GetToken()).Logger()
 	c := &mock{
