@@ -16,8 +16,8 @@ import (
 
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/golang/protobuf/proto"
-	"github.com/txchat/im-util/app-examples/echo/types"
 	"github.com/txchat/im/api/protocol"
+	"github.com/txchat/im/benchmarks/server/echo/types"
 )
 
 const (

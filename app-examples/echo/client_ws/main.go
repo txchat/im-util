@@ -15,8 +15,8 @@ import (
 
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/websocket"
-	"github.com/txchat/im-util/app-examples/echo/types"
 	"github.com/txchat/im/api/protocol"
+	"github.com/txchat/im/benchmarks/server/echo/types"
 )
 
 const (
@@ -38,14 +38,14 @@ func main() {
 	<-exit
 }
 
-func client(appId, token, _ string) {
+func client(appId, token, server string) {
 	quit := make(chan bool, 1)
 	defer func() {
 		close(quit)
 	}()
 
 	// connnect to server
-	wsURL := "ws://" + os.Args[3] + "/sub"
+	wsURL := "ws://" + server + "/sub"
 	fmt.Println("wsUrl", wsURL)
 	conn, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {

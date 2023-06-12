@@ -18,7 +18,7 @@ build_time=$(shell date "+%Y-%m-%d %H:%M:%S %Z")
 
 #pkg_commit_name=${project_version}_${git_commit}
 TARGET_DIR=target
-servers=client_tcp client_ws server
+servers=client_tcp client_ws
 
 # flags
 #issue1221: https://github.com/spf13/cobra/issues/1221
