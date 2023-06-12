@@ -3,19 +3,24 @@ package pressure
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/internal/device"
+	"github.com/txchat/dtalk/api/proto/auth"
 	xlog "github.com/txchat/im-util/internal/log"
 	"github.com/txchat/im-util/internal/rate"
-	"github.com/txchat/im-util/internal/reader"
-	"github.com/txchat/im-util/internal/user"
+	"github.com/txchat/im-util/pkg/device"
+	"github.com/txchat/im-util/pkg/net"
+	"github.com/txchat/im-util/pkg/user"
 	"github.com/txchat/im-util/pkg/util"
-	"github.com/txchat/im-util/pressure/pkg/msggenerator"
+	"github.com/txchat/im-util/pkg/wallet"
+	"github.com/txchat/im-util/pressure/internal/msggenerator"
 )
 
 var Cmd = &cobra.Command{
@@ -39,7 +44,7 @@ var (
 
 func init() {
 	Cmd.Flags().IntVarP(&userNum, "users", "u", 2, "users number")
-	Cmd.Flags().StringVarP(&server, "server", "s", "172.16.101.107:3102", "server address")
+	Cmd.Flags().StringVarP(&server, "server", "s", "ws://172.16.101.107:3102", "server address")
 	Cmd.Flags().StringVarP(&appID, "appId", "a", "dtalk", "")
 	Cmd.Flags().StringVarP(&outputPath, "out", "o", "./pressure_output.txt", "")
 	Cmd.Flags().StringVarP(&userStorePath, "in", "i", "./users.txt", "users store file path")
@@ -78,7 +83,7 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 	log.Info().Msg("config")
 
 	//读取用户信息文件，为了加快生成速度文件存储完整的助记词、私钥、公钥、地址
-	metadata, err := reader.LoadMetadata(userStorePath, readSplit)
+	metadata, err := wallet.LoadMetadata(userStorePath, readSplit)
 	if err != nil {
 		return fmt.Errorf("LoadMetadata failed: %v", err)
 	}
@@ -94,14 +99,22 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 		users = append(users, u)
 	}
 
+	URL, err := url.Parse(server)
+	if err != nil {
+		return fmt.Errorf("url parse failed: %v", err)
+	}
+
+	lp := NewLogPrinter(outLog)
 	var devices []*device.Device
 	for _, u := range users {
-		d := device.NewDevice("", "", 0, outLog, u)
-		err = d.DialIMServer(appID, server, nil)
+		d := device.NewDevice(uuid.NewString(), "pressure-test", auth.Device_Android, u)
+		err = d.DialIMServer(appID, *URL, nil)
 		if err != nil {
 			log.Error().Err(err).Msg("DialIMServer failed")
 			continue
 		}
+		d.SetOnSend(lp.onSendLogs)
+		d.SetOnReceive(lp.onReceiveLogs)
 		err = d.TurnOn()
 		if err != nil {
 			log.Error().Err(err).Msg("Device TurnOn failed")
@@ -151,4 +164,44 @@ func pressureRunE(cmd *cobra.Command, args []string) error {
 			return nil
 		}
 	}
+}
+
+type LogPrinter struct {
+	log zerolog.Logger
+}
+
+func NewLogPrinter(log zerolog.Logger) *LogPrinter {
+	return &LogPrinter{log: log}
+}
+
+func (lp *LogPrinter) onSendLogs(c *net.IMConn, action device.ActionInfo) error {
+	// 发出时间点的日志
+	lp.log.Info().Str("action", action.Action).
+		Str("user_id", action.UID).
+		Str("conn_id", action.ConnID).
+		Str("uuid", action.UUID).
+		Str("from", action.From).
+		Str("target", action.Target).
+		Str("channel_type", action.ChannelType.String()).
+		Int32("seq", action.Seq).
+		Int32("ack", action.Ack).
+		Str("mid", action.Mid).
+		Msg("")
+	return nil
+}
+
+func (lp *LogPrinter) onReceiveLogs(c *net.IMConn, action device.ActionInfo) error {
+	// 接收时间点的日志
+	lp.log.Info().Str("action", action.Action).
+		Str("user_id", action.UID).
+		Str("conn_id", action.ConnID).
+		Str("uuid", action.UUID).
+		Str("from", action.From).
+		Str("target", action.Target).
+		Str("channel_type", action.ChannelType.String()).
+		Int32("seq", action.Seq).
+		Int32("ack", action.Ack).
+		Str("mid", action.Mid).
+		Msg("")
+	return nil
 }

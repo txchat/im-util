@@ -70,7 +70,7 @@ func init() {
 }
 
 func checkRunE(cmd *cobra.Command, args []string) error {
-	apiRequest, err := auth.NewApiRequestFromToken(token)
+	apiRequest, err := auth.NewAPIRequestFromToken(token)
 	if err != nil {
 		return err
 	}
@@ -79,14 +79,14 @@ func checkRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	if isMatch, err := signatory.Match(apiRequest.GetSignature(), apiRequest.GetPublicKey()); !isMatch {
-		return auth.ERR_SIGNATUREINVALID(err)
+		return auth.ErrSignatureInvalid(err)
 	}
 	if isCkTimeOut && signatory.IsExpire() {
-		return auth.ERR_SIGNATUREEXPIRED
+		return auth.ErrSignatureExpired
 	}
 	uid := address.PublicKeyToAddress(address.NormalVer, apiRequest.GetPublicKey())
 	if uid == "" {
-		return auth.ERR_UIDINVALID
+		return auth.ErrUIDInvalid
 	}
 	cmd.Printf("verify success, uid is: %s\n", uid)
 	return nil

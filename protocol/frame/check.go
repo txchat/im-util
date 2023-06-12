@@ -1,7 +1,7 @@
 package frame
 
 import (
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 var authCheckerFactory = make(map[string]AuthChecker)
@@ -20,5 +20,5 @@ func LoadAuthChecker(name string) (AuthChecker, error) {
 
 type AuthChecker interface {
 	Set(key string, val interface{})
-	Check(p *comet.Proto) error
+	Check(p *protocol.Proto) error
 }

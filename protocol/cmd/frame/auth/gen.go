@@ -29,7 +29,7 @@ import (
 	"github.com/Terry-Mao/goim/pkg/bufio"
 	"github.com/golang/protobuf/proto"
 	"github.com/spf13/cobra"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 // genCmd represents the gen command
@@ -85,7 +85,7 @@ func genRunE(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	authFrame := &comet.AuthMsg{
+	authFrame := &protocol.AuthBody{
 		AppId: appType,
 		Token: token,
 		Ext:   extData,
@@ -95,9 +95,9 @@ func genRunE(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	p := &comet.Proto{
+	p := &protocol.Proto{
 		Ver:  ver,
-		Op:   int32(comet.Op_Auth),
+		Op:   int32(protocol.Op_Auth),
 		Seq:  seq,
 		Ack:  ack,
 		Body: authFrameData,

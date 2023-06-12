@@ -4,17 +4,17 @@ import (
 	"fmt"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/txchat/dtalk/service/auth/model"
+	"github.com/txchat/dtalk/pkg/auth"
 	"github.com/txchat/im-util/protocol/frame"
-	comet "github.com/txchat/im/api/comet/grpc"
+	"github.com/txchat/im/api/protocol"
 )
 
 type authChecker struct {
 }
 
-func (t *authChecker) Check(p *comet.Proto) (err error) {
+func (t *authChecker) Check(p *protocol.Proto) (err error) {
 	var (
-		authFrame comet.AuthMsg
+		authFrame protocol.AuthBody
 	)
 	err = proto.Unmarshal(p.Body, &authFrame)
 	if err != nil {
@@ -31,7 +31,7 @@ func (t *authChecker) Check(p *comet.Proto) (err error) {
 		return
 	}
 	if authFrame.Token == "" {
-		err = model.ErrInvalidToken
+		err = auth.ErrSignatureInvalid(err)
 	}
 	return
 }

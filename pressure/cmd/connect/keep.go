@@ -25,19 +25,20 @@ package connect
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
-	"github.com/txchat/im-util/internal/device"
+	"github.com/txchat/dtalk/api/proto/auth"
 	xlog "github.com/txchat/im-util/internal/log"
 	"github.com/txchat/im-util/internal/rate"
-	"github.com/txchat/im-util/internal/reader"
-	"github.com/txchat/im-util/internal/user"
+	"github.com/txchat/im-util/pkg/device"
+	"github.com/txchat/im-util/pkg/user"
+	"github.com/txchat/im-util/pkg/wallet"
 )
 
 // keepCmd represents the keep command
@@ -71,7 +72,7 @@ func init() {
 	// keepCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	keepCmd.Flags().IntVarP(&userNum, "users", "u", 2, "users number")
-	keepCmd.Flags().StringVarP(&server, "server", "s", "172.16.101.107:3102", "server address")
+	keepCmd.Flags().StringVarP(&server, "server", "s", "ws://172.16.101.107:3102", "server address")
 	keepCmd.Flags().StringVarP(&appId, "appId", "a", "dtalk", "")
 	keepCmd.Flags().StringVarP(&userStorePath, "in", "i", "./users.txt", "users store file path")
 	keepCmd.Flags().StringVarP(&readSplit, "rs", "", ",", "存储用户信息的字段分隔符[默认：,]")
@@ -87,15 +88,18 @@ func keepRunE(*cobra.Command, []string) error {
 		Str("totalTime", totalTime).
 		Str("userStorePath", userStorePath).
 		Int("userNum", userNum).Msg("success config")
-	logNil := zerolog.New(nil)
 
 	ttTime, err := rate.ParseDuration(totalTime)
 	if err != nil {
 		return fmt.Errorf("ParseDuration failed: %v", err)
 	}
 
+	URL, err := url.Parse(server)
+	if err != nil {
+		return fmt.Errorf("url parse failed: %v", err)
+	}
 	//读取用户信息文件，为了加快生成速度文件存储完整的助记词、私钥、公钥、地址
-	metadata, err := reader.LoadMetadata(userStorePath, readSplit)
+	metadata, err := wallet.LoadMetadata(userStorePath, readSplit)
 	if err != nil {
 		return fmt.Errorf("LoadMetadata failed: %v", err)
 	}
@@ -112,7 +116,7 @@ func keepRunE(*cobra.Command, []string) error {
 	for _, md := range metadata[:userNum] {
 		u := user.NewUser(md.GetAddress(), md.GetPrivateKey(), md.GetPublicKey())
 		//users = append(users, u)
-		d := device.NewDevice("", "", 0, logNil, u)
+		d := device.NewDevice("", "", auth.Device_Android, u)
 		devices = append(devices, d)
 	}
 	log.Info().Str("cost", fmt.Sprint(time.Since(start))).Msg("all init success!")
@@ -123,7 +127,7 @@ func keepRunE(*cobra.Command, []string) error {
 		wg.Add(1)
 		go func(d *device.Device) {
 			defer wg.Done()
-			err = d.DialIMServer(appId, server, nil)
+			err = d.DialIMServer(appId, *URL, nil)
 			if err != nil {
 				log.Error().Err(err).Msg("DialIMServer failed")
 				return
